@@ -42,6 +42,9 @@ for i in range(t.shape[0]-1):
     v[i+1] = v[i] + ddx * dt
     omega[i+1] = omega[i] + ddtheta * dt
 
+energy = 0.5 * (m1 * np.square(v) + m2 * (l**2 * np.square(omega) + 2*l*omega*v*np.cos(theta)+np.square(v))) - m2*g*l*np.cos(theta)
+print("Energy change = ", energy[-1] - energy[0])
+
 plt.figure(1)
 plt.plot(t, x,"b", label = 'x')
 plt.plot(t, theta, "g", label = "theta")
@@ -49,4 +52,10 @@ plt.plot([0, np.max(t)],[0,0],'k')
 plt.legend()
 plt.xlabel('t')
 plt.title('Cart and Pole')
+plt.show()
+
+plt.figure(2)
+plt.plot(t, energy)
+plt.xlabel('t')
+plt.ylabel('energy')
 plt.show()
