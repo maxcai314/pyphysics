@@ -32,16 +32,13 @@ omega[0] = omega0
 
 #Euler Forward
 for i in range(t.shape[0]-1):
-    x[i+1] = x[i] + v[i] * dt
-    theta[i+1] = theta[i] + omega[i] * dt
-    
     A = np.array([[m1 + m2, m2 * l * np.cos(theta[i])],[np.cos(theta[i]), l]])
     RHS = np.array([[m2 * l * omega[i]**2 * np.sin(theta[i])],[-g * np.sin(theta[i])]])
-    Sol = np.linalg.solve(A,RHS)
-    ddx = Sol[0][0]
-    ddtheta = Sol[1][0]
+    [[ddx],[ddtheta]] = np.linalg.solve(A,RHS)
     #Solves System of Equations for x double dot and theta double dot
     
+    x[i+1] = x[i] + v[i] * dt
+    theta[i+1] = theta[i] + omega[i] * dt
     v[i+1] = v[i] + ddx * dt
     omega[i+1] = omega[i] + ddtheta * dt
 
