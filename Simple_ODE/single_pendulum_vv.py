@@ -32,8 +32,7 @@ for i in range(t.shape[0]-1):
     ddtheta = -g/l * np.sin(theta[i+1]) #next timestep
     omega[i+1] = omega_halfstep + 0.5 *dt * ddtheta
 
-for i in range(t.shape[0]):
-    energy[i] = 0.5 * m * omega[i]**2 * l**2 - (m*g*l*np.cos(theta[i]))
+energy = 0.5 * m * np.square(omega) * l**2 - (m*g*l*np.cos(theta))
 print("Energy change = ", energy[-1] - energy[0])
 #local energy conservation is on the order of dt^2
 #global energy conservation is linear with dt

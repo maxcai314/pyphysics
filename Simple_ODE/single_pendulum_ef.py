@@ -29,8 +29,7 @@ for i in range(t.shape[0]-1):
     theta[i+1] = theta[i] + dt * omega[i]
     omega[i+1] = omega[i] - g/l * dt * np.sin(theta[i])
 
-for i in range(t.shape[0]):
-    energy[i] = 0.5 * m * omega[i]**2 * l**2 - (m*g*l*np.cos(theta[i]))
+energy = 0.5 * m * np.square(omega) * l**2 - (m*g*l*np.cos(theta))
 print("Energy change = ", energy[-1] - energy[0])
 #local energy conservation is on the order of dt^2
 #global energy conservation is linear with dt
