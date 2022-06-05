@@ -42,12 +42,12 @@ class Pendulum(pygame.sprite.Sprite):
         super().__init__()
         self.window = window
         print("Successfully created pendulum")
-        #self.image = pygame.image.load("frog/attack_1.gif")
-        #self.rect = self.image.get_rect()
-        #self.rect.topleft = [200,200]
+        self.image = pygame.image.load("frog/attack_1.gif")
+        self.rect = self.image.get_rect()
+        self.rect.topleft = [200,200]
     def update(self,theta):
-        pygame.draw.circle(self.window, (255,0,0), (200,200),50)
-        #print(theta, "is the theta given to pendulum")
+        #pygame.draw.circle(self.window, (255,0,0), (200,200),50)
+        print(theta, "is the theta given to pendulum")
         pass
         
         
@@ -63,9 +63,9 @@ screen = pygame.display.set_mode((screen_width,screen_height))
 pygame.display.set_caption("Pendulum Animation")
 
 # Creating the sprites and groups
-# moving_sprites = pygame.sprite.Group()
+moving_sprites = pygame.sprite.Group()
 pendulum1 = Pendulum(screen)
-# moving_sprites.add(pendulum1)
+moving_sprites.add(pendulum1)
 
 while True:
     for event in pygame.event.get():   
@@ -73,8 +73,8 @@ while True:
             pygame.quit()
             sys.exit()
     
-    pendulum1.update(10)
-    #pendulum1.draw()
+    moving_sprites.update(10)
+    moving_sprites.draw(screen)
     pygame.display.flip()
     
-            
+exit()
