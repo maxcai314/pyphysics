@@ -10,41 +10,54 @@ import numpy as np
 import pygame
 import sys
 
+
+
 #First part numerically integrates Pendulum motion
 #dd_theta + g/l sin(theta) = 0
-g = 10
-l = 5
-m = 1
-dt = 1E-3
-theta0 = 2.85
-omega0 = 0
-t = np.arange(0, 60, dt)
-theta = np.zeros_like(t)
-omega = np.zeros_like(t)
-energy = np.zeros_like(t)
-theta[0] = theta0
-omega[0] = omega0
 
-#Euler Forward
-for i in range(t.shape[0]-1):
-    theta[i+1] = theta[i] + dt * omega[i]
-    omega[i+1] = omega[i] - g/l * dt * np.sin(theta[i])
-
-energy = 0.5 * m * np.square(omega) * l**2 - (m*g*l*np.cos(theta))
-print("Energy change = ", energy[-1] - energy[0])
+class Pendulum():
+    def __init__(self,g=10,l=5,m=1,dt=1E-3,theta0=2,omega0=0):
+        #g = 10
+        #l = 5
+        #m = 1
+        #dt = 1E-3
+        #theta0 = 2
+        #omega0 = 0
+        self.g = g
+        self.l = l
+        self.m = m
+        self.dt = dt
+        self.theta0 = theta0
+        self.omega0 = omega0
+        
+    def time_integrate(self,time=60):
+        self.t = np.arange(0, time, self.dt) #To Do: Allow program to run indefinitely
+        self.theta = np.zeros_like(self.t)
+        self.omega = np.zeros_like(self.t)
+        self.energy = np.zeros_like(self.t)
+        self.theta[0] = self.theta0
+        self.omega[0] = self.omega0
+        #Euler Forward
+        for i in range(self.t.shape[0]-1):
+            self.theta[i+1] = self.theta[i] + self.dt * self.omega[i]
+            self.omega[i+1] = self.omega[i] - self.g/self.l * self.dt * np.sin(self.theta[i])
+        
+        self.energy = 0.5 * self.m * np.square(self.omega) * self.l**2 - (self.m*self.g*self.l*np.cos(self.theta))
+        print("Energy change = ", self.energy[-1] - self.energy[0])
 
 
 #Animates Pendulum
 
 
-class Pendulum(pygame.sprite.Sprite):
-    def __init__(self,window, theta):
-        super().__init__()
+class PendulumSprite(pygame.sprite.Sprite,Pendulum):
+    def __init__(self,window):
+        pygame.sprite.Sprite.__init__(self)
+        Pendulum.__init__(self)
         self.window = window
         #self.image = pygame.image.load("frog/attack_1.gif")
         #self.rect = self.image.get_rect()
         #self.rect.topleft = (0,0)
-        self.theta = theta
+        #self.theta = theta
     def update(self,timestep):
         r = 0.3 * min(self.window.get_size())
         x = 0.5 * self.window.get_size()[0] + r * np.sin(self.theta[int(timestep)])
@@ -70,7 +83,8 @@ pygame.display.set_caption("Pendulum Animation")
 print(screen.get_size())
 # Creating the sprites and groups
 moving_sprites = pygame.sprite.Group()
-pendulum1 = Pendulum(screen, theta)
+pendulum1 = PendulumSprite(screen)
+pendulum1.time_integrate()
 moving_sprites.add(pendulum1)
 
 
@@ -93,8 +107,8 @@ while True:
     #print("time ", t[int(timestep)])
     
     clock.tick(fps)
-    timestep += 1/fps/dt
-    if timestep >= np.size(t):
+    timestep += 1/fps/pendulum1.dt
+    if timestep >= np.size(pendulum1.t):
         pygame.quit()
         sys.exit()
     
