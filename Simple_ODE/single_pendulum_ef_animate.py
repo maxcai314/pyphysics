@@ -17,12 +17,6 @@ import sys
 
 class Pendulum():
     def __init__(self,g=10,l=5,m=1,dt=1E-3,theta0=2,omega0=0):
-        #g = 10
-        #l = 5
-        #m = 1
-        #dt = 1E-3
-        #theta0 = 2
-        #omega0 = 0
         self.g = g
         self.l = l
         self.m = m
@@ -54,10 +48,7 @@ class PendulumSprite(pygame.sprite.Sprite,Pendulum):
         pygame.sprite.Sprite.__init__(self)
         Pendulum.__init__(self)
         self.window = window
-        #self.image = pygame.image.load("frog/attack_1.gif")
-        #self.rect = self.image.get_rect()
-        #self.rect.topleft = (0,0)
-        #self.theta = theta
+        
     def update(self,timestep):
         r = 0.3 * min(self.window.get_size())
         x = 0.5 * self.window.get_size()[0] + r * np.sin(self.theta[int(timestep)])
