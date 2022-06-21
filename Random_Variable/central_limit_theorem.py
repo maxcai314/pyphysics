@@ -9,13 +9,18 @@ Created on Tue Jun 21 22:59:39 2022
 import numpy as np
 import matplotlib.pyplot as plt
 
-n = 10000
+n = 1000
 m = 10000
 
-X = np.zeros(m)
-for i in range(m):
-    xi = np.random.randint(1,7,n)
-    X[i] = np.mean(xi)
+#Works for very large n*m but requires for loop
+#X = np.zeros(m)
+#for i in range(m):
+#    xi = np.random.randint(1,7,n)
+#    X[i] = np.mean(xi)
+
+#Does not require for loop but uses lots of memory
+xi = np.random.randint(1,7,size=(n,m))
+X = np.mean(xi,axis=0)
 
 plt.hist(X,30, density = True)
 
