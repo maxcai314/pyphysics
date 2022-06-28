@@ -13,7 +13,7 @@ R = 0.1 #Variance of noise
 Q = 0.2 #Variance of measurement noise
 x0 = 0
 Sigma0 = 1
-N = 200 #number of steps
+N = 100 #number of steps
 A = 1
 C = 1
 x = np.zeros(N)
@@ -47,8 +47,10 @@ for i in range (1,N):
     
 
 plt.figure(1)
-plt.plot(t,x,'r')
-plt.plot(t,mu,'b')
+plt.plot(t,x,'r',label="Real State")
+plt.plot(t,mu,'b',label= "Estimated State")
+plt.title("Kalman Filter")
+plt.legend()
 #plt.plot(t,mu-np.sqrt(Sigma),'k')
 #plt.plot(t,mu+np.sqrt(Sigma),'k')
 plt.show()
