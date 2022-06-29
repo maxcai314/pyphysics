@@ -41,6 +41,7 @@ for i in range (1,N):
     #prediction
     mu_pred = A * mu[i-1]
     Sigma_pred = A * Sigma[i-1] * A + R
+    #measurement
     Sigma[i] = 1./(C * 1./Q * C + 1./Sigma_pred)
     mu[i] = Sigma[i] * (C * 1./Q * z[i] + 1./Sigma_pred * mu_pred)
     
@@ -48,6 +49,7 @@ for i in range (1,N):
 
 plt.figure(1)
 plt.plot(t,x,'r',label="Real State")
+plt.plot(t,z,'g',label= "Measured State")
 plt.plot(t,mu,'b',label= "Estimated State")
 plt.title("Kalman Filter")
 plt.legend()
