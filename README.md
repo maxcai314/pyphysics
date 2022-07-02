@@ -1,4 +1,5 @@
 # PyPhysics
 Physics simulations in Python
 
-Just practicing git
+* Numerical Integration of Pendulum
+* Kalman Filter
