@@ -9,18 +9,22 @@ Created on Tue Jun 28 22:18:25 2022
 import numpy as np
 import matplotlib.pyplot as plt
 
-R = 0.1 #Variance of noise
-Q = 0.2 #Variance of measurement noise
+R = 0.2 #Variance of noise
+Q = 0.3 #Variance of measurement noise
 x0 = 0
 Sigma0 = 1
 N = 100 #number of steps
 A = 1
+B = 1
 C = 1
 x = np.zeros(N)
+u = np.zeros(N) #Control
 epsilon = np.random.normal(0,np.sqrt(R),N)
 delta = np.random.normal(0,np.sqrt(Q),N)
 mu = np.zeros(N)
 Sigma = np.zeros(N)
+for i in range(N):
+    u[i] = 0.1
 
 t = np.arange(N)
 z = np.zeros(N)
@@ -28,7 +32,7 @@ z = np.zeros(N)
 #simulation
 x[0] = x0
 for i in range(1,N):
-    x[i] = A * x[i-1] + epsilon[i]
+    x[i] = A * x[i-1] + B * u[i] + epsilon[i]
 
 #measurement
 for i in range(1,N):
@@ -39,7 +43,7 @@ mu[0] = x0
 Sigma[0] = Sigma0
 for i in range (1,N):
     #prediction
-    mu_pred = A * mu[i-1]
+    mu_pred = A * mu[i-1] + B * u[i]
     Sigma_pred = A * Sigma[i-1] * A + R
     #measurement
     Sigma[i] = 1./(C * 1./Q * C + 1./Sigma_pred)
