@@ -64,11 +64,9 @@ for i in range (1,N):
     Sigma_pred = A * Sigma[i-1] * A + R
     #kalman gain
     K = Sigma_pred * C * 1./(C * Sigma_pred * C + Q)
+    #measurement
     Sigma_k[i] = (1 - K * C) * Sigma_pred
     mu_k[i] = mu_pred + K * (z[i] - C * mu_pred)
-    #measurement
-    Sigma[i] = 1./(C * 1./Q * C + 1./Sigma_pred)
-    mu[i] = Sigma[i] * (C * 1./Q * z[i] + 1./Sigma_pred * mu_pred)
 
 #np.max(np.abs(mu_k - mu))
 #np.max(np.abs(Sigma_k - Sigma))
@@ -76,7 +74,7 @@ for i in range (1,N):
 plt.figure(1)
 plt.plot(t,x,'r',label="Real State")
 plt.plot(t,z,'g',label= "Measured State")
-plt.plot(t,mu,'b',label= "Estimated State")
+plt.plot(t,mu_k,'b',label= "Estimated State")
 plt.title("Kalman Filter")
 plt.legend()
 #plt.plot(t,mu-np.sqrt(Sigma),'k')
