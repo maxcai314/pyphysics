@@ -46,7 +46,7 @@ for i in range(1,N):
     x[i] = np.matmul(A, x[i-1]) + epsilon[i]
 
 #measurement
-for i in range(1,N):
+for i in range(0,N):
     z[i] = np.matmul(C, x[i]) + delta[i]
     #only theta is measured
 
@@ -56,7 +56,7 @@ Sigma[0] = Sigma0
 for i in range (1,N):
     #prediction
     mu_pred = np.matmul(A, mu[i-1])
-    Sigma_pred = np.matmul(A, (np.matmul(Sigma[i-1], A.T) + R))
+    Sigma_pred = np.matmul(np.matmul(A, Sigma[i-1]),A.T) + R
     #measurement
     Sigma[i] = np.linalg.inv(np.matmul(C.T/Q,C)+np.linalg.inv(Sigma_pred))
     mu[i] = np.matmul(Sigma[i],C.T/Q*z[i]+np.matmul(np.linalg.inv(Sigma_pred),mu_pred))
