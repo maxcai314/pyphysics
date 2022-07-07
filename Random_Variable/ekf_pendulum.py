@@ -9,8 +9,8 @@ Created on Sat Jul  2 13:33:16 2022
 import numpy as np
 import matplotlib.pyplot as plt
 
-R = 0.0001 #Variance of noise, no convariance matrix because both noise values currently satisfy same distribution
-Q = 0.02 #Variance of measurement noise
+R = 1E-9 #Variance of noise, no convariance matrix because both noise values currently satisfy same distribution
+Q = 0.2 #Variance of measurement noise
 x0 = np.array([[3.1],[0]]) #theta, omega
 Sigma0 = np.array([[1,0],[0,1]])
 N = 1000 #number of steps
@@ -19,7 +19,6 @@ l = 1
 k = g/l
 dt = 1E-2
 
-G = np.array([[1-k*dt**2,dt],[-k * dt, 1]]) #Jacobian of evolution function
 #B = 0
 C = np.array([[1,0]]) #row vector
 
@@ -47,7 +46,7 @@ def evolve(x):
 x[0] = x0
 for i in range(1,N):
     x[i] = evolve(x[i-1])
-    #x[i] += epsilon[i]
+    x[i] += epsilon[i]
 
 #measurement
 for i in range(0,N):
@@ -59,11 +58,13 @@ mu[0] = x0
 Sigma[0] = Sigma0
 mu_pred = np.zeros((2,1))
 for i in range (1,N):
+    G = np.array([[1-k*dt**2 * np.cos(x[i,0]),dt],[-k * dt * np.cos(x[i,0]), 1]]) #Jacobian of evolution function
     #prediction
     mu_pred = evolve(mu[i-1])
     Sigma_pred = np.matmul(np.matmul(G, Sigma[i-1]),G.T) + R
     #kalman gain
-    K = np.matmul(np.matmul(Sigma_pred,C.T),np.linalg.inv(np.matmul(np.matmul(C,Sigma_pred),C.T)+Q))
+    K = np.matmul(Sigma_pred,C.T)*((np.matmul(np.matmul(C,Sigma_pred),C.T)+Q))**-1
+    #K = np.matmul(np.matmul(Sigma_pred,C.T),np.linalg.inv((np.matmul(np.matmul(C,Sigma_pred),C.T))[0,0]+Q))
     #K = np.array([[0.00],[0]])
     #measurement
     Sigma[i] = np.matmul(np.identity(2)-np.matmul(K,C),Sigma_pred)
@@ -83,14 +84,14 @@ plt.legend()
 plt.xlabel('t')
 plt.title('Pendulum EKF')
 
-# plt.figure(2)
-# plt.plot(t,Sigma[:,0,0],'b',label = 'theta variance')
-# plt.plot(t,Sigma[:,1,0],'m')
-# plt.plot(t,Sigma[:,0,1],'g',label = 'theta and omega covariance')
-# plt.plot(t,Sigma[:,1,1],'r',label = 'omega variance')
-# plt.legend()
-# plt.xlabel('t')
-# plt.title('EKF Covariance')
+plt.figure(2)
+plt.plot(t,Sigma[:,0,0],'b',label = 'theta variance')
+plt.plot(t,Sigma[:,1,0],'m')
+plt.plot(t,Sigma[:,0,1],'g',label = 'theta and omega covariance')
+plt.plot(t,Sigma[:,1,1],'r',label = 'omega variance')
+plt.legend()
+plt.xlabel('t')
+plt.title('EKF Covariance')
 
 plt.show()
 
