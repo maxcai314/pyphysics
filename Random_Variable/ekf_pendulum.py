@@ -58,17 +58,15 @@ mu[0] = x0
 Sigma[0] = Sigma0
 mu_pred = np.zeros((2,1))
 for i in range (1,N):
-    G = np.array([[1-k*dt**2 * np.cos(x[i,0]),dt],[-k * dt * np.cos(x[i,0]), 1]]) #Jacobian of evolution function
+    G = np.array([[1-k*dt**2 * np.cos(mu[i-1,0]),dt],[-k * dt * np.cos(mu[i-1,0]), 1]]) #Jacobian of evolution function
     #prediction
     mu_pred = evolve(mu[i-1])
-    Sigma_pred = np.matmul(np.matmul(G, Sigma[i-1]),G.T) + R
+    Sigma_pred = G @ Sigma[i-1] @ G.T + R
     #kalman gain
-    K = np.matmul(Sigma_pred,C.T)*((np.matmul(np.matmul(C,Sigma_pred),C.T)+Q))**-1
-    #K = np.matmul(np.matmul(Sigma_pred,C.T),np.linalg.inv((np.matmul(np.matmul(C,Sigma_pred),C.T))[0,0]+Q))
-    #K = np.array([[0.00],[0]])
+    K = Sigma_pred @ C.T * (C @ Sigma_pred @ C.T + Q)**-1
     #measurement
-    Sigma[i] = np.matmul(np.identity(2)-np.matmul(K,C),Sigma_pred)
-    mu[i] = mu_pred + np.matmul(K,z[i]-np.matmul(C,mu_pred))
+    Sigma[i] = (np.identity(2)- K @ C) @ Sigma_pred
+    mu[i] = mu_pred + K @ (z[i]-C @ mu_pred)
 
 #print(np.max(np.abs(mu[:,0]-mu_k[:,0])))
 #print((Sigma[-1]-Sigma_k[-1]))
