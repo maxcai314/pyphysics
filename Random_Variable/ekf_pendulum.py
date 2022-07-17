@@ -10,7 +10,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 class Pendulum():
-    def __init__(self,g=10,l=1,dt=1E-2,x0 = np.array([[3.1],[0]]),Sigma0 = np.array([[1,0],[0,1]]),R = 1E-9,Q = 0.2):
+    def __init__(self,g=10,l=1,dt=1E-2,x0 = np.array([[3.1],[0]]),Sigma0 = np.array([[1,0],[0,1]]),R = 1E-9 * np.identity(2),Q = 0.2):
         #todo: turn R and Q into covariance matrices instead of numbers
         self.g = g
         self.l = l
@@ -34,8 +34,14 @@ class Pendulum():
         self.Q = Q
         #todo: move to separate fucntion to generate real-time
         #make independant on N
-        self.epsilon = np.random.normal(0,np.sqrt(self.R),(self.N,2,1))
-        self.delta = np.random.normal(0,np.sqrt(self.Q),self.N)
+        self.epsilon = np.zeros((self.N,2,1))
+        self.delta = np.zeros(self.N)
+        
+        for i in range(self.N):
+            #np.random.multivariate_normal generates row vectors, so each has to be set and transposed one by one
+            self.epsilon[i] = np.array([np.random.multivariate_normal(np.array([0,0]),R)]).T
+        
+        self.delta = np.random.normal(0,Q,self.N)
     
     def evolve(self,x):
         output = np.zeros((2,1))
