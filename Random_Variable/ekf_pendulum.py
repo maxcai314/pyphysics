@@ -22,27 +22,24 @@ class Pendulum():
         #todo: eliminate N and make computing real-time
         #B = 0
         #todo: add control function
-        self.N = 1000
-        self.x = np.zeros((self.N,2,1))
-        self.mu = np.zeros((self.N,2,1))
-        self.Sigma = np.zeros((self.N,2,2))
-        self.z = np.zeros(self.N)
+        self.x = np.zeros((2,1))
+        self.mu = np.zeros((2,1))
+        self.Sigma = np.zeros((2,2))
+        self.z = 0
         self.x[0] = self.x0
         self.mu[0] = self.x0
         self.Sigma[0] = Sigma0
-        self.control = np.zeros(self.N)
+        self.control = 0
         self.R = R
         self.Q = Q
+        self.record_x = np.array([])
+        self.record_mu = np.array([])
+        self.record_z = np.array([])
+        #TODO: record values
         #todo: move to separate fucntion to generate real-time
         #make independant on N
-        self.epsilon = np.zeros((self.N,2,1))
-        self.delta = np.zeros(self.N)
-        
-        for i in range(self.N):
-            #np.random.multivariate_normal generates row vectors, so each has to be set and transposed one by one
-            self.epsilon[i] = np.array([np.random.multivariate_normal(np.array([0,0]),R)]).T
-        
-        self.delta = np.random.normal(0,np.sqrt(Q),self.N)
+        self.epsilon = np.zeros((2,1))
+        self.delta = 0
     
     def evolve(self,x,control):
         output = np.zeros((2,1))
@@ -50,28 +47,27 @@ class Pendulum():
         output[1] = x[1] - self.dt * self.k * np.sin(x[0]) + self.dt * control
         return output
     
-    def simulate(self):
-        for i in range(1,self.N):
-            self.x[i] = self.evolve(self.x[i-1],self.control[i-1])
-            self.x[i] += self.epsilon[i]
-            self.control[i] = -self.decay * self.x[i,1]
-    
+    def simulate(self,control):
+        self.x = self.evolve(self.x,self.control)
+        self.epsilon = np.array([np.random.multivariate_normal(np.array([0,0]),self.R)]).T
+        self.delta = np.random.normal(0,np.sqrt(self.Q))
+        self.x += self.epsilon
+        self.control = -self.decay * self.x
+
     def measure(self):
-        for i in range(0,self.N):
-            self.z[i] = self.C @ self.x[i] + self.delta[i]
+        self.z = self.C @ self.x + self.delta
     
     def kalman_filter(self):
         mu_pred = np.zeros((2,1))
-        for i in range (1,self.N):
-            G = np.array([[1-self.k*self.dt**2 * np.cos(self.mu[i-1,0]),self.dt],[-self.k * self.dt * np.cos(self.mu[i-1,0]), 1-self.decay * self.dt]]) #Jacobian of evolution function
-            #prediction
-            mu_pred = self.evolve(self.mu[i-1],self.control[i-1])
-            Sigma_pred = G @ self.Sigma[i-1] @ G.T + self.R
-            #kalman gain
-            K = Sigma_pred @ self.C.T * (self.C @ Sigma_pred @ self.C.T + self.Q)**-1
-            #measurement
-            self.Sigma[i] = (np.identity(2)- K @ self.C) @ Sigma_pred
-            self.mu[i] = mu_pred + K @ (self.z[i]-self.C @ mu_pred)
+        G = np.array([[1-self.k*self.dt**2 * np.cos(self.mu[0]),self.dt],[-self.k * self.dt * np.cos(self.mu[0]), 1-self.decay * self.dt]]) #Jacobian of evolution function
+        #prediction
+        mu_pred = self.evolve(self.mu,self.control)
+        Sigma_pred = G @ self.Sigma @ G.T + self.R
+        #kalman gain
+        K = Sigma_pred @ self.C.T * (self.C @ Sigma_pred @ self.C.T + self.Q)**-1
+        #measurement
+        self.Sigma = (np.identity(2)- K @ self.C) @ Sigma_pred
+        self.mu = mu_pred + K @ (self.z-self.C @ mu_pred)
     
 
 np.random.seed(seed=10)
