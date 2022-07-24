@@ -19,7 +19,6 @@ class Pendulum():
         self.dt = dt
         self.x0 = x0
         self.C = np.array([[1,0]]) #row vector
-        #todo: eliminate N and make computing real-time
         #B = 0
         #todo: add control function
         self.x = np.zeros((2,1))
@@ -35,7 +34,7 @@ class Pendulum():
         self.record_x = np.array([])
         self.record_mu = np.array([])
         self.record_z = np.array([])
-        #TODO: record values
+        self.record_Sigma = np.array([])
         #todo: move to separate fucntion to generate real-time
         #make independant on N
         self.epsilon = np.zeros((2,1))
@@ -53,9 +52,12 @@ class Pendulum():
         self.delta = np.random.normal(0,np.sqrt(self.Q))
         self.x += self.epsilon
         self.control = -self.decay * self.x
+        self.record.x = np.append(self.record_x,self.x)
+        
 
     def measure(self):
         self.z = self.C @ self.x + self.delta
+        self.record_z = np.append(self.record_z,self.z)
     
     def kalman_filter(self):
         mu_pred = np.zeros((2,1))
@@ -68,22 +70,25 @@ class Pendulum():
         #measurement
         self.Sigma = (np.identity(2)- K @ self.C) @ Sigma_pred
         self.mu = mu_pred + K @ (self.z-self.C @ mu_pred)
+        self.record_mu = np.append(self.record_mu,self.mu)
+        self.record_Sigma = np.append(self.record_Sigma, self.Sigma)
     
 
 np.random.seed(seed=10)
 
+#make foorloop
 pendulum = Pendulum()
 pendulum.simulate()
 pendulum.measure()
 pendulum.kalman_filter()
 
-t = pendulum.dt * np.arange(pendulum.N)
+t = pendulum.dt * np.arange(N) #fix
 
 plt.figure(1)
 
-plt.plot(t, pendulum.z, 'r', label = 'theta measured')
-plt.plot(t, pendulum.x[:,0], 'b', label = 'theta')
-plt.plot(t, pendulum.mu[:,0], 'g', label = 'theta estimate')
+plt.plot(t, pendulum.record_z, 'r', label = 'theta measured')
+plt.plot(t, pendulum.record_x[:,0], 'b', label = 'theta')
+plt.plot(t, pendulum.record_mu[:,0], 'g', label = 'theta estimate')
 # plt.plot(t, pendulum.x[:,1], 'b', label = 'omega')
 # plt.plot(t, pendulum.mu[:,1], 'g', label = 'omega estimate')
 plt.plot([0, np.max(t)],[0,0],'k')
@@ -92,17 +97,17 @@ plt.xlabel('t')
 plt.title('Pendulum EKF')
 
 # plt.figure(2)
-# plt.plot(t, pendulum.x[:,0]-pendulum.mu[:,0], 'r', label = 'theta error')
-# plt.plot(t, pendulum.x[:,1]-pendulum.mu[:,1], 'g', label = 'omega error')
+# plt.plot(t, pendulum.record_x[:,0]-pendulum.record_mu[:,0], 'r', label = 'theta error')
+# plt.plot(t, pendulum.record_x[:,1]-pendulum.record_mu[:,1], 'g', label = 'omega error')
 # plt.plot([0, np.max(t)],[0,0],'k')
 # plt.legend()
 # plt.xlabel('t')
 # plt.title('Pendulum EKF error')
 
 plt.figure(3)
-plt.plot(t,pendulum.Sigma[:,0,0],'b',label = 'theta variance')
-plt.plot(t,pendulum.Sigma[:,0,1],'g',label = 'theta and omega covariance')
-plt.plot(t,pendulum.Sigma[:,1,1],'r',label = 'omega variance')
+plt.plot(t,pendulum.record_Sigma[:,0,0],'b',label = 'theta variance')
+plt.plot(t,pendulum.record_Sigma[:,0,1],'g',label = 'theta and omega covariance')
+plt.plot(t,pendulum.record_Sigma[:,1,1],'r',label = 'omega variance')
 plt.legend()
 plt.xlabel('t')
 plt.title('EKF Covariance')
