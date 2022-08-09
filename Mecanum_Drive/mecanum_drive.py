@@ -13,8 +13,8 @@ def rotationmatrix(psi):
 
 def rotationmatrixdot(psi,psidot):
     return np.array([[-np.sin(psi),-np.cos(psi),0],[np.cos(psi),-np.sin(psi),0],[0,0,0]]) * psidot
-N = int(1E4)
-dt = 1E-3
+N = int(1E3)
+dt = 1E-2
 t = np.arange(0, N*dt, dt)
 
 #Robot Parameters
@@ -40,7 +40,7 @@ M_r = np.diag([m,m,I_z])
 M_w = np.diag([I_w1,I_w2,I_w3,I_w4])
 
 q_r0 = np.array([[0],[0],[0]])
-q_rdot0 = np.array([[1],[0],[0.5]])
+q_rdot0 = np.array([[1],[0],[2]])
 q_r = np.zeros((3,1,N))
 q_rdot = np.zeros((3,1,N))
 q_r[:,:,0] = q_r0
@@ -68,6 +68,11 @@ print(I_w1 * 4 * r**-2 * q_rdot[2,0,-1])
 print(m+I_w1 * 4 * r**-2)
 print(I_z+ I_w1 * 4 * (l+L)**2 * r**-2)
 
+xPos = q_r[0,0,:]
+yPos = q_r[1,0,:]
+
+maxd = np.max(np.abs(np.array([xPos,yPos])))
+
 plt.figure(1)
 plt.plot([0, np.max(t)],[0,0],'k')
 plt.plot(t, q_r[0,0,:],'b', label='X position')
@@ -87,3 +92,14 @@ plt.legend()
 plt.xlabel('t')
 plt.title('Robot Velocity')
 plt.show()
+
+plt.figure(3)
+#plt.axes().set_aspect('equal')
+axis = plt.gca()
+axis.set_aspect('equal')
+plt.xlim(-1.1*maxd,1.1 * maxd)
+plt.ylim(-1.1*maxd,1.1 * maxd)
+plt.plot(xPos,yPos,'b')
+plt.xlabel('X')
+plt.ylabel('Y')
+plt.title('Robot Trajectory')
