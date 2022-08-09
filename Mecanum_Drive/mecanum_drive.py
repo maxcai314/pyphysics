@@ -8,28 +8,19 @@ Created on Mon Aug  8 17:22:58 2022
 import numpy as np
 import matplotlib.pyplot as plt
 
-def rotationmatrix(psi):
-    return np.array([[np.cos(psi),-np.sin(psi),0],[np.sin(psi),np.cos(psi),0],[0,0,1]])
-
-def rotationmatrixdot(psi,psidot):
-    return np.array([[-np.sin(psi),-np.cos(psi),0],[np.cos(psi),-np.sin(psi),0],[0,0,0]]) * psidot
 N = int(1E3)
 dt = 1E-2
 t = np.arange(0, N*dt, dt)
 
 #Robot Parameters
-L = 0.2
-l = 0.15
+L, l = 0.2, 0.15
 r = 0.05
 m = 5
 I_z = 3
-I_w1 = 0.05
-I_w2 = 0.05
-I_w3 = 0.05
-I_w4 = 0.05
-S = np.array([[L],[L],[-L],[-L]])
-d = np.array([[l],[-l],[l],[-l]])
-friction = 100
+I_w = np.array([0.05,0.05,0.05,0.05])
+S = np.array([L, L, -L, -L])
+d = np.array([l, -l, l, -l])
+friction = 10#0
 alpha = np.array([[0.25 * np.pi],[-0.25 * np.pi],[-0.25 * np.pi],[0.25 * np.pi]])
 
 R = np.zeros((4,3))
@@ -37,7 +28,7 @@ for i in range(4):
     R[i] = 1/r * np.array([1, -np.tan(alpha[i])**-1, -d[i]-S[i]*(np.tan(alpha[i])**-1)])
 
 M_r = np.diag([m,m,I_z])
-M_w = np.diag([I_w1,I_w2,I_w3,I_w4])
+M_w = np.diag(I_w)
 
 q_r0 = np.array([[0],[0],[0]])
 q_rdot0 = np.array([[1],[0],[2]])
@@ -49,8 +40,11 @@ q_rdot[:,:,0] = q_rdot0
 Gamma = np.zeros((4,1,N))
 
 
+def rotationmatrix(psi):
+    return np.array([[np.cos(psi),-np.sin(psi),0],[np.sin(psi),np.cos(psi),0],[0,0,1]])
 
-
+def rotationmatrixdot(psi,psidot):
+    return np.array([[-np.sin(psi),-np.cos(psi),0],[np.cos(psi),-np.sin(psi),0],[0,0,0]]) * psidot
 
 for i in range(1,N):
     Rotation = rotationmatrix(q_r[2,0,i-1])
@@ -64,14 +58,17 @@ for i in range(1,N):
     q_rdot[:,:,i] = q_rdot[:,:,i-1] + q_rddot * dt
     q_r[:,:,i] = q_r[:,:,i-1] + q_rdot[:,:,i-1] * dt
 
-print(I_w1 * 4 * r**-2 * q_rdot[2,0,-1])
-print(m+I_w1 * 4 * r**-2)
-print(I_z+ I_w1 * 4 * (l+L)**2 * r**-2)
+print(I_w[0] * 4 * r**-2 * q_rdot[2,0,-1])
+print(m+I_w[0] * 4 * r**-2)
+print(I_z+ I_w[0] * 4 * (l+L)**2 * r**-2)
 
 xPos = q_r[0,0,:]
 yPos = q_r[1,0,:]
 
 maxd = np.max(np.abs(np.array([xPos,yPos])))
+
+print("\nFinal Position Matches:")
+print(q_r[:,0,-1] - np.array([-2.14695516,  4.46602514,  2.55898749]) < 1E-8)
 
 plt.figure(1)
 plt.plot([0, np.max(t)],[0,0],'k')
