@@ -8,6 +8,58 @@ Created on Mon Aug  8 17:22:58 2022
 import numpy as np
 import matplotlib.pyplot as plt
 
+class Robot():
+    def __init__(self,L=0.2,l=0.15,r=0.05,m=5,I_z=3,
+                 I_w=[0.05,0.05,0.05,0.05],
+                 S=None,d=None,alpha=None,
+                 friction=10):
+        self.L=L
+        self.l=l
+        self.r=r
+        self.m=m
+        self.I_z=I_z
+        self.I_w = I_w
+        self.S = S
+        self.d = d
+        self.alpha = alpha
+        self.friction=friction
+        
+        if self.S==None:
+            self.S = [self.L, self.L, -self.L, -self.L]
+        if self.d==None:
+            self.d = [self.l, -self.l, self.l, -self.l]
+        if self.alpha==None:
+            self.alpha = [0.25 * np.pi, -0.25 * np.pi, -0.25 * np.pi, 0.25 * np.pi]
+    
+    def rotationmatrix(psi):
+        return np.array([[np.cos(psi),-np.sin(psi),0],[np.sin(psi),np.cos(psi),0],[0,0,1]])
+
+    def rotationmatrixdot(psi,psidot):
+        return np.array([[-np.sin(psi),-np.cos(psi),0],[np.cos(psi),-np.sin(psi),0],[0,0,0]]) * psidot
+    
+    def H_analytic():
+        #print(I_w[0] * 4 * r**-2 * q_rdot[2,0,-1])
+        #print(m+I_w[0] * 4 * r**-2)
+        #print(I_z+ I_w[0] * 4 * (l+L)**2 * r**-2)
+        pass
+    
+    def K_div_psidot_analytic():
+        pass
+    
+    def time_integrate(self,N,dt):
+        self.N = N
+        self.dt = dt
+        pass
+    
+    def plot_evolution():
+        pass
+    
+    def plot_trajectory():
+        pass
+    
+
+robot = Robot()
+
 N = int(1E3)
 dt = 1E-2
 t = np.arange(0, N*dt, dt)
