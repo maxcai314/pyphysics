@@ -12,9 +12,9 @@ def rotationmatrix(psi):
     return np.array([[np.cos(psi),-np.sin(psi),0],[np.sin(psi),np.cos(psi),0],[0,0,1]])
 
 def rotationmatrixdot(psi,psidot):
-    return np.array([[-np.sin(psi),-np.cos(psi),0],[np.cos(psi),-np.sin(psi),0],[0,0,1]]) * psidot
-N = 10000
-dt = 1E-2
+    return np.array([[-np.sin(psi),-np.cos(psi),0],[np.cos(psi),-np.sin(psi),0],[0,0,0]]) * psidot
+N = int(1E5)
+dt = 1E-3
 t = np.arange(0, N*dt, dt)
 
 #Robot Parameters
@@ -33,7 +33,7 @@ alpha = np.array([[0.25 * np.pi],[-0.25 * np.pi],[-0.25 * np.pi],[0.25 * np.pi]]
 
 R = np.zeros((4,3))
 for i in range(4):
-    R[i] = 1/r * np.array([1, -np.tan(alpha[i])**-1, -d[i]-S[i]*(np.tan(alpha[i]**-1))])
+    R[i] = 1/r * np.array([1, -np.tan(alpha[i])**-1, -d[i]-S[i]*(np.tan(alpha[i])**-1)])
 
 M_r = np.diag([m,m,I_z])
 M_w = np.diag([I_w1,I_w2,I_w3,I_w4])
@@ -52,8 +52,8 @@ Gamma = np.zeros((4,1,N))
 
 
 for i in range(1,N):
-    Rotation = rotationmatrix(q_r[2,0,N-1])
-    Rotationdot = rotationmatrixdot(q_r[2,0,N-1],q_rdot[2,0,N-1])
+    Rotation = rotationmatrix(q_r[2,0,i-1])
+    Rotationdot = rotationmatrixdot(q_r[2,0,i-1],q_rdot[2,0,i-1])
     
     H = M_r + Rotation @ R.T @ M_w @ R @ Rotation.T
     K = Rotation @ R.T @ M_w @ R @ Rotationdot.T
@@ -62,8 +62,10 @@ for i in range(1,N):
     q_rddot = np.linalg.inv(H) @ (F_a - K @ q_rdot[:,:,i-1])
     q_rdot[:,:,i] = q_rdot[:,:,i-1] + q_rddot * dt
     q_r[:,:,i] = q_r[:,:,i-1] + q_rdot[:,:,i-1] * dt
-    
 
+print(I_w1 * 4 * r**-2 * q_rdot[2,0,-1])
+print(m+I_w1 * 4 * r**-2)
+print(I_z+ I_w1 * 4 * (l+L)**2 * r**-2)
 
 plt.figure(1)
 plt.plot([0, np.max(t)],[0,0],'k')
