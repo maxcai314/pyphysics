@@ -13,7 +13,7 @@ def rotationmatrix(psi):
 
 def rotationmatrixdot(psi,psidot):
     return np.array([[-np.sin(psi),-np.cos(psi),0],[np.cos(psi),-np.sin(psi),0],[0,0,0]]) * psidot
-N = int(1E5)
+N = int(1E4)
 dt = 1E-3
 t = np.arange(0, N*dt, dt)
 
@@ -29,6 +29,7 @@ I_w3 = 0.05
 I_w4 = 0.05
 S = np.array([[L],[L],[-L],[-L]])
 d = np.array([[l],[-l],[l],[-l]])
+friction = 100
 alpha = np.array([[0.25 * np.pi],[-0.25 * np.pi],[-0.25 * np.pi],[0.25 * np.pi]])
 
 R = np.zeros((4,3))
@@ -39,7 +40,7 @@ M_r = np.diag([m,m,I_z])
 M_w = np.diag([I_w1,I_w2,I_w3,I_w4])
 
 q_r0 = np.array([[0],[0],[0]])
-q_rdot0 = np.array([[2],[0],[2]])
+q_rdot0 = np.array([[1],[0],[0.5]])
 q_r = np.zeros((3,1,N))
 q_rdot = np.zeros((3,1,N))
 q_r[:,:,0] = q_r0
@@ -59,7 +60,7 @@ for i in range(1,N):
     K = Rotation @ R.T @ M_w @ R @ Rotationdot.T
     F_a = Rotation @ R.T @ Gamma[:,:,i-1]
     
-    q_rddot = np.linalg.inv(H) @ (F_a - K @ q_rdot[:,:,i-1])
+    q_rddot = np.linalg.inv(H) @ (F_a - K @ q_rdot[:,:,i-1] - friction * q_rdot[:,:,i-1])
     q_rdot[:,:,i] = q_rdot[:,:,i-1] + q_rddot * dt
     q_r[:,:,i] = q_r[:,:,i-1] + q_rdot[:,:,i-1] * dt
 
