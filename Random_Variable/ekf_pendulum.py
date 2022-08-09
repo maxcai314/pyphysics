@@ -25,10 +25,9 @@ class Pendulum():
         self.mu = np.zeros((2,1))
         self.Sigma = np.zeros((2,2))
         self.z = 0
-        self.x[0] = self.x0
-        self.mu[0] = self.x0
-        self.Sigma[0] = Sigma0
-        self.control = 0
+        self.x = self.x0
+        self.mu = self.x0
+        self.Sigma = Sigma0
         self.R = R
         self.Q = Q
         self.record_x = np.array([])
@@ -47,12 +46,12 @@ class Pendulum():
         return output
     
     def simulate(self,control):
-        self.x = self.evolve(self.x,self.control)
+        self.x = self.evolve(self.x,control)
         self.epsilon = np.array([np.random.multivariate_normal(np.array([0,0]),self.R)]).T
         self.delta = np.random.normal(0,np.sqrt(self.Q))
         self.x += self.epsilon
         self.control = -self.decay * self.x
-        self.record.x = np.append(self.record_x,self.x)
+        self.record_x = np.append(self.record_x,self.x)
         
 
     def measure(self):
@@ -75,12 +74,13 @@ class Pendulum():
     
 
 np.random.seed(seed=10)
+N = 1000
 
-#make foorloop
 pendulum = Pendulum()
-pendulum.simulate()
-pendulum.measure()
-pendulum.kalman_filter()
+for i in range(N):
+    pendulum.simulate(0)
+    pendulum.measure()
+    pendulum.kalman_filter()
 
 t = pendulum.dt * np.arange(N) #fix
 
