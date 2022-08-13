@@ -12,7 +12,7 @@ class Robot():
     def __init__(self,L=0.2,l=0.15,r=0.05,m=5,I_z=3,
                  I_w=[0.05,0.05,0.05,0.05],
                  S=None,d=None,alpha=None,
-                 friction=10):
+                 friction=0.1):
         self.L=L
         self.l=l
         self.r=r
@@ -50,14 +50,10 @@ class Robot():
     def K_div_psidot_analytic(self):
         return np.matrix([[0,self.I_w[0] * 4 * self.r**-2 ,0],[self.I_w[0] * 4 * self.r**-2,0,0],[0,0,0]])
     
-    def time_integrate(self,q_r0, q_rdot0,N,dt=1E-2,Gamma=None):
+    def time_integrate(self,q_r0, q_rdot0, Gamma, N, dt=1E-2):
         self.N = N
         self.dt = dt
         self.t = np.arange(0, self.N*self.dt, self.dt)
-        
-        if (Gamma == None):
-            Gamma = np.zeros((4,1,N))
-        
         self.q_r = np.zeros((3,1,N))
         self.q_rdot = np.zeros((3,1,N))
         self.q_r[:,:,0] = q_r0
@@ -67,11 +63,13 @@ class Robot():
             Rotation = self.rotationmatrix(self.q_r[2,0,i-1])
             Rotationdot = self.rotationmatrixdot(self.q_r[2,0,i-1],self.q_rdot[2,0,i-1])
             
+            q_wdot = self.R @ Rotation.T @ self.q_rdot[:,:,i-1]
+            
             self.H = self.M_r + Rotation @ self.R.T @ self.M_w @ self.R @ Rotation.T
             self.K = Rotation @ self.R.T @ self.M_w @ self.R @ Rotationdot.T
-            self.F_a = Rotation @ self.R.T @ Gamma[:,:,i-1]
+            self.F_a = Rotation @ self.R.T @ (Gamma[:,:,i-1] - q_wdot * self.friction)
             
-            self.q_rddot = np.linalg.inv(self.H) @ (self.F_a - self.K @ self.q_rdot[:,:,i-1] - self.friction * self.q_rdot[:,:,i-1])
+            self.q_rddot = np.linalg.inv(self.H) @ (self.F_a - self.K @ self.q_rdot[:,:,i-1])
             self.q_rdot[:,:,i] = self.q_rdot[:,:,i-1] + self.q_rddot * self.dt
             self.q_r[:,:,i] = self.q_r[:,:,i-1] + self.q_rdot[:,:,i-1] * self.dt
         
@@ -114,8 +112,14 @@ class Robot():
 robot = Robot()
 
 N = int(1E3)
+Gamma = np.zeros((4,1,N))
+Gamma[0,:,:] = 2
+Gamma[1,:,:] = 1
+Gamma[2,:,:] = 2
+Gamma[3,:,:] = 1
 q_r0 = np.array([[0],[0],[0]])
-q_rdot0 = np.array([[1],[0],[2]])
-robot.time_integrate(q_r0, q_rdot0, N)
+q_rdot0 = np.array([[1],[1],[2]])
+
+robot.time_integrate(q_r0, q_rdot0, Gamma, N)
 robot.plot_evolution()
 robot.plot_trajectory()
