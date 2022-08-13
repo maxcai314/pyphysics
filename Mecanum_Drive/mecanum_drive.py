@@ -74,7 +74,7 @@ class Robot():
             self.q_r[i] = self.q_r[i-1] + self.q_rdot[i-1] * self.dt
         
     
-    def plot_evolution(self):
+    def plot_evolution(self, block=False):
         plt.plot([0, np.max(self.t)],[0,0],'k')
         plt.plot(self.t, self.q_r[:,0,0],'b', label='X position')
         plt.plot(self.t, self.q_r[:,1,0],'r', label='Y position')
@@ -82,7 +82,7 @@ class Robot():
         plt.legend()
         plt.xlabel('t')
         plt.title('Mechanum Wheeled Robot')
-        plt.show()
+        plt.show(block=block)
         
         plt.plot([0, np.max(self.t)],[0,0],'k')
         plt.plot(self.t, self.q_rdot[:,0,0],'b', label='X velocity')
@@ -91,15 +91,14 @@ class Robot():
         plt.legend()
         plt.xlabel('t')
         plt.title('Robot Velocity')
-        plt.show()
+        plt.show(block=block)
     
-    def plot_trajectory(self):
+    def plot_trajectory(self, block=False):
         xPos = self.q_r[:,0,0]
         yPos = self.q_r[:,1,0]
 
         maxd = np.max(np.abs(np.array([xPos,yPos])))
         
-        plt.axes().set_aspect('equal')
         axis = plt.gca()
         axis.set_aspect('equal')
         plt.xlim(-1.1*maxd,1.1 * maxd)
@@ -108,6 +107,7 @@ class Robot():
         plt.xlabel('X')
         plt.ylabel('Y')
         plt.title('Robot Trajectory')
+        plt.show(block=block)
 
 if __name__ == "__main__":
     robot = Robot()
