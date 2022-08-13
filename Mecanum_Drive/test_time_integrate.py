@@ -23,3 +23,10 @@ q_rdot0 = np.array([[1],[1],[2]])
 robot.time_integrate(q_r0, q_rdot0, Gamma, N)
 robot.plot_evolution()
 robot.plot_trajectory()
+
+ref_q_r = np.array([[ 0.73906968],[ 0.83730122],[-5.36311989]])
+max_error = np.max(np.abs(robot.q_r[:,:,-1] - ref_q_r))
+if max_error<1E-8:
+    print("test passed")
+else:
+    print("test failed")
