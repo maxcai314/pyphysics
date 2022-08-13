@@ -74,26 +74,30 @@ class Robot():
             self.q_r[i] = self.q_r[i-1] + self.q_rdot[i-1] * self.dt
         
     
-    def plot_evolution(self, block=False):
-        plt.plot([0, np.max(self.t)],[0,0],'k')
-        plt.plot(self.t, self.q_r[:,0,0],'b', label='X position')
-        plt.plot(self.t, self.q_r[:,1,0],'r', label='Y position')
-        plt.plot(self.t, self.q_r[:,2,0],'g', label='Psi position')
-        plt.legend()
-        plt.xlabel('t')
-        plt.title('Mechanum Wheeled Robot')
-        plt.show(block=block)
+    def plot_evolution(self, fig=None, ax1=None, ax2=None, block=False):
+        if fig==None:
+            fig, (ax1, ax2) = plt.subplots(2)
         
-        plt.plot([0, np.max(self.t)],[0,0],'k')
-        plt.plot(self.t, self.q_rdot[:,0,0],'b', label='X velocity')
-        plt.plot(self.t, self.q_rdot[:,1,0],'r', label='Y velocity')
-        plt.plot(self.t, self.q_rdot[:,2,0],'g', label='Psi velocity')
-        plt.legend()
-        plt.xlabel('t')
-        plt.title('Robot Velocity')
+        ax1.plot([0, np.max(self.t)],[0,0],'k')
+        ax1.plot(self.t, self.q_r[:,0,0],'b', label='X position')
+        ax1.plot(self.t, self.q_r[:,1,0],'r', label='Y position')
+        ax1.plot(self.t, self.q_r[:,2,0],'g', label='Psi position')
+        ax1.legend()
+        ax1.title.set_text('Mechanum Wheeled Robot')
+        
+        ax2.plot([0, np.max(self.t)],[0,0],'k')
+        ax2.plot(self.t, self.q_rdot[:,0,0],'b', label='X velocity')
+        ax2.plot(self.t, self.q_rdot[:,1,0],'r', label='Y velocity')
+        ax2.plot(self.t, self.q_rdot[:,2,0],'g', label='Psi velocity')
+        ax2.legend()
+        ax2.set_xlabel('t')
+        
         plt.show(block=block)
     
-    def plot_trajectory(self, block=False):
+    def plot_trajectory(self, fig=None, block=False):
+        if fig==None:
+            fig = plt.figure()
+        
         xPos = self.q_r[:,0,0]
         yPos = self.q_r[:,1,0]
 
