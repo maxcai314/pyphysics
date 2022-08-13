@@ -108,18 +108,19 @@ class Robot():
         plt.xlabel('X')
         plt.ylabel('Y')
         plt.title('Robot Trajectory')
-        
-robot = Robot()
 
-N = int(1E3)
-Gamma = np.zeros((4,1,N))
-Gamma[0,:,:] = 2
-Gamma[1,:,:] = 1
-Gamma[2,:,:] = 2
-Gamma[3,:,:] = 1
-q_r0 = np.array([[0],[0],[0]])
-q_rdot0 = np.array([[1],[1],[2]])
-
-robot.time_integrate(q_r0, q_rdot0, Gamma, N)
-robot.plot_evolution()
-robot.plot_trajectory()
+if __name__ == "__main__":
+    robot = Robot()
+    
+    N = int(1E3)
+    Gamma = np.zeros((4,1,N))
+    Gamma[0,:,:] = 2
+    Gamma[1,:,:] = 1
+    Gamma[2,:,:] = 2
+    Gamma[3,:,:] = 1
+    q_r0 = np.array([[0],[0],[0]])
+    q_rdot0 = np.array([[1],[1],[2]])
+    
+    robot.time_integrate(q_r0, q_rdot0, Gamma, N)
+    robot.plot_evolution()
+    robot.plot_trajectory()
