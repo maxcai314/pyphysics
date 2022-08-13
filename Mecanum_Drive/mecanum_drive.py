@@ -54,48 +54,48 @@ class Robot():
         self.N = N
         self.dt = dt
         self.t = np.arange(0, self.N*self.dt, self.dt)
-        self.q_r = np.zeros((3,1,N))
-        self.q_rdot = np.zeros((3,1,N))
-        self.q_r[:,:,0] = q_r0
-        self.q_rdot[:,:,0] = q_rdot0
+        self.q_r = np.zeros((N,3,1))
+        self.q_rdot = np.zeros((N,3,1))
+        self.q_r[0] = q_r0
+        self.q_rdot[0] = q_rdot0
         
         for i in range(1,N):
-            Rotation = self.rotationmatrix(self.q_r[2,0,i-1])
-            Rotationdot = self.rotationmatrixdot(self.q_r[2,0,i-1],self.q_rdot[2,0,i-1])
+            Rotation = self.rotationmatrix(self.q_r[i-1,2,0])
+            Rotationdot = self.rotationmatrixdot(self.q_r[i-1,2,0],self.q_rdot[i-1,2,0])
             
-            q_wdot = self.R @ Rotation.T @ self.q_rdot[:,:,i-1]
+            q_wdot = self.R @ Rotation.T @ self.q_rdot[i-1]
             
             self.H = self.M_r + Rotation @ self.R.T @ self.M_w @ self.R @ Rotation.T
             self.K = Rotation @ self.R.T @ self.M_w @ self.R @ Rotationdot.T
-            self.F_a = Rotation @ self.R.T @ (Gamma[:,:,i-1] - q_wdot * self.friction)
+            self.F_a = Rotation @ self.R.T @ (Gamma[i-1] - q_wdot * self.friction)
             
-            self.q_rddot = np.linalg.inv(self.H) @ (self.F_a - self.K @ self.q_rdot[:,:,i-1])
-            self.q_rdot[:,:,i] = self.q_rdot[:,:,i-1] + self.q_rddot * self.dt
-            self.q_r[:,:,i] = self.q_r[:,:,i-1] + self.q_rdot[:,:,i-1] * self.dt
+            self.q_rddot = np.linalg.inv(self.H) @ (self.F_a - self.K @ self.q_rdot[i-1])
+            self.q_rdot[i] = self.q_rdot[i-1] + self.q_rddot * self.dt
+            self.q_r[i] = self.q_r[i-1] + self.q_rdot[i-1] * self.dt
         
     
     def plot_evolution(self):
         plt.plot([0, np.max(self.t)],[0,0],'k')
-        plt.plot(self.t, self.q_r[0,0,:],'b', label='X position')
-        plt.plot(self.t, self.q_r[1,0,:],'r', label='Y position')
-        plt.plot(self.t, self.q_r[2,0,:],'g', label='Psi position')
+        plt.plot(self.t, self.q_r[:,0,0],'b', label='X position')
+        plt.plot(self.t, self.q_r[:,1,0],'r', label='Y position')
+        plt.plot(self.t, self.q_r[:,2,0],'g', label='Psi position')
         plt.legend()
         plt.xlabel('t')
         plt.title('Mechanum Wheeled Robot')
         plt.show()
         
         plt.plot([0, np.max(self.t)],[0,0],'k')
-        plt.plot(self.t, self.q_rdot[0,0,:],'b', label='X velocity')
-        plt.plot(self.t, self.q_rdot[1,0,:],'r', label='Y velocity')
-        plt.plot(self.t, self.q_rdot[2,0,:],'g', label='Psi velocity')
+        plt.plot(self.t, self.q_rdot[:,0,0],'b', label='X velocity')
+        plt.plot(self.t, self.q_rdot[:,1,0],'r', label='Y velocity')
+        plt.plot(self.t, self.q_rdot[:,2,0],'g', label='Psi velocity')
         plt.legend()
         plt.xlabel('t')
         plt.title('Robot Velocity')
         plt.show()
     
     def plot_trajectory(self):
-        xPos = self.q_r[0,0,:]
-        yPos = self.q_r[1,0,:]
+        xPos = self.q_r[:,0,0]
+        yPos = self.q_r[:,1,0]
 
         maxd = np.max(np.abs(np.array([xPos,yPos])))
         
@@ -113,11 +113,11 @@ if __name__ == "__main__":
     robot = Robot()
     
     N = int(1E3)
-    Gamma = np.zeros((4,1,N))
-    Gamma[0,:,:] = 2
-    Gamma[1,:,:] = 1
-    Gamma[2,:,:] = 2
-    Gamma[3,:,:] = 1
+    Gamma = np.zeros((N,4,1))
+    Gamma[:,0,0] = 2
+    Gamma[:,1,0] = 1
+    Gamma[:,2,0] = 2
+    Gamma[:,3,0] = 1
     q_r0 = np.array([[0],[0],[0]])
     q_rdot0 = np.array([[1],[1],[2]])
     
