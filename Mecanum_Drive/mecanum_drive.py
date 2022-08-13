@@ -73,7 +73,9 @@ class Robot():
             self.q_rdot[i] = self.q_rdot[i-1] + self.q_rddot * self.dt
             self.q_r[i] = self.q_r[i-1] + self.q_rdot[i-1] * self.dt
         
-    
+    def convert_target_control_heading_to_torque(self, q_rddot_heading):
+        return self.R @ q_rddot_heading
+   
     def plot_evolution(self, fig=None, ax1=None, ax2=None, block=False):
         if fig==None:
             fig, (ax1, ax2) = plt.subplots(2)
