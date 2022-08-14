@@ -76,6 +76,17 @@ class Robot():
     def convert_target_control_heading_to_torque(self, q_rddot_heading):
         return self.R @ q_rddot_heading
    
+    def get_robot_outline(self, state):
+        rotation = np.array([[np.cos(state[2]),-np.sin(state[2])],[np.sin(state[2]),np.cos(state[2])]])[:,:,0]
+        pos = np.array([[state[0,0]],[state[1,0]]])
+        output = np.zeros((5,2,1))
+        output[0] = pos + rotation @ np.array([[self.L],[self.l]])
+        output[1] = pos + rotation @ np.array([[self.L],[-self.l]])
+        output[2] = pos + rotation @ np.array([[-self.L],[-self.l]])
+        output[3] = pos + rotation @ np.array([[-self.L],[self.l]])
+        output[4] = pos + rotation @ np.array([[self.L],[self.l]])
+        return output
+   
     def plot_evolution(self, fig=None, ax1=None, ax2=None, block=False):
         if fig==None:
             fig, (ax1, ax2) = plt.subplots(2)
@@ -96,7 +107,7 @@ class Robot():
         
         plt.show(block=block)
     
-    def plot_trajectory(self, fig=None, block=False):
+    def plot_trajectory(self, fig=None, block=False, drawrobot = True):
         if fig==None:
             fig = plt.figure()
         
@@ -113,6 +124,9 @@ class Robot():
         plt.xlabel('X')
         plt.ylabel('Y')
         plt.title('Robot Trajectory')
+        if drawrobot:
+            plt.plot(self.get_robot_outline(self.q_r[0])[:,0],self.get_robot_outline(self.q_r[0])[:,1],"purple")
+            plt.plot(self.get_robot_outline(self.q_r[-1])[:,0],self.get_robot_outline(self.q_r[-1])[:,1],"red")
         plt.show(block=block)
 
 if __name__ == "__main__":
