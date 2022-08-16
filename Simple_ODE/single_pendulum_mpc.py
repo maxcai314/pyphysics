@@ -27,11 +27,12 @@ l = 10
 m = 1
 theta0 = 1
 omega0 = 0
+dt = 1E-1
 
 N = 100
 
 model.set_rhs('theta',omega)
-model.set_rhs('omega', -g/l * sin(theta))
+model.set_rhs('omega', -g/l * sin(theta) + u)
 
 model.set_expression(expr_name='cost',expr=(theta**2 + omega**2))
 
@@ -43,7 +44,7 @@ setup_mpc = {
     'n_horizon' : 10,
     'n_robust' : 0,
     'open_loop' : 0,
-    't_step' : 0.05,
+    't_step' : dt,
     'state_discretization' : 'collocation',
     'collocation_deg' : 3,
     'collocation_ni' : 1,
@@ -62,11 +63,11 @@ mpc.set_rterm(torque=1e-4)
 
 mpc.bounds['upper','_x','theta'] = np.pi
 
-mpc.bounds['lower','_x','theta'] = np.pi
+mpc.bounds['lower','_x','theta'] = -np.pi
 
-mpc.bounds['upper','_u','torque'] = 0.5
+mpc.bounds['upper','_u','torque'] = 0.2
 
-mpc.bounds['lower','_u','torque'] = -0.5
+mpc.bounds['lower','_u','torque'] = -0.2
 
 mpc.setup()
 
@@ -74,7 +75,7 @@ estimator = do_mpc.estimator.StateFeedback(model)
 
 simulator = do_mpc.simulator.Simulator(model)
 
-simulator.set_param(t_step = 0.1)
+simulator.set_param(t_step = dt)
 simulator.setup()
 
 x0 = np.array([theta0,omega0])
@@ -89,32 +90,33 @@ x_traj = np.zeros((N,2))
 x_traj[0] = x0
 
 for k in range(N):
-    # u0 = mpc.make_step(x0)
+    u0 = mpc.make_step(x0)
     y_next = simulator.make_step(u0)
     x0 = estimator.make_step(y_next)
     x_traj[k,] = x0.T
+
+
+
+if True:
+    import matplotlib.pyplot as plt
     
-import matplotlib.pyplot as plt
-
-t = np.arange(0,N)
-
-plt.figure(1)
-plt.plot(t, x_traj[:,0], 'b', label = 'theta')
-plt.plot(t, x_traj[:,1], 'g', label = 'omega')
-plt.plot([0, np.max(t)],[0,0],'k')
-plt.legend()
-plt.xlabel('t')
-plt.title('Pendulum')
-plt.show()
-
-
-
-# from matplotlib import rcParams
-# rcParams['axes.grid'] = True
-# rcParams['font.size'] = 18
-
-# import matplotlib.pyplot as plt
-# fig, ax, graphics = do_mpc.graphics.default_plot(mpc.data,figsize=(16,9))
-# graphics.plot_results()
-# graphics.reset_axes()
-# plt.show(block=False)
+    t = np.arange(0,N)
+    
+    plt.figure(1)
+    plt.plot(t, x_traj[:,0], 'b', label = 'theta')
+    plt.plot(t, x_traj[:,1], 'g', label = 'omega')
+    plt.plot([0, np.max(t)],[0,0],'k')
+    plt.legend()
+    plt.xlabel('t')
+    plt.title('Pendulum')
+    plt.show(block=False)
+else:
+    from matplotlib import rcParams
+    rcParams['axes.grid'] = True
+    rcParams['font.size'] = 18
+    
+    import matplotlib.pyplot as plt
+    fig, ax, graphics = do_mpc.graphics.default_plot(mpc.data,figsize=(16,9))
+    graphics.plot_results()
+    graphics.reset_axes()
+    plt.show(block=False)
