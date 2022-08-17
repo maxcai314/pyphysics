@@ -3,6 +3,10 @@
 """
 Created on Mon Aug  8 17:22:58 2022
 
+Based on Master Thesis by I.M. Caireta 2019,
+Model Predictive Control for a Mecanum-wheeled robot in Dynamical Environments
+http://www.iri.upc.edu/files/academic/master_thesis/155-Master-thesis-document.pdf
+
 @author: maxcai
 """
 import numpy as np
