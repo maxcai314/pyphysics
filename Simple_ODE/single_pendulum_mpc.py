@@ -19,7 +19,7 @@ theta = model.set_variable(var_type='_x', var_name='theta', shape=(1,1))
 omega = model.set_variable(var_type='_x', var_name='omega', shape=(1,1))
 u     = model.set_variable(var_type='_u', var_name='torque', shape=(1,1))
 
-#dd_theta + g/l sin(theta) = 0
+#dd_theta + g/l sin(theta) = u
 
 np.random.seed(10)
 g = 10
