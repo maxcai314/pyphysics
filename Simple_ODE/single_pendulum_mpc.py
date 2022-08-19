@@ -31,6 +31,8 @@ dt = 1E-1
 
 N = 100
 
+use_own_plot = True
+
 model.set_rhs('theta',omega)
 model.set_rhs('omega', -g/l * sin(theta) + u)
 
@@ -78,7 +80,7 @@ simulator = do_mpc.simulator.Simulator(model)
 simulator.set_param(t_step = dt)
 simulator.setup()
 
-x0 = np.array([theta0,omega0])
+x0 = np.array([[theta0],[omega0]])
 mpc.x0 = x0
 simulator.x0 = x0
 estimator.x0 = x0
@@ -86,18 +88,18 @@ estimator.x0 = x0
 mpc.set_initial_guess()
 
 u0 = np.array([[0.]])
-x_traj = np.zeros((N,2))
+x_traj = np.zeros((N,2,1))
 x_traj[0] = x0
 
 for k in range(N):
     u0 = mpc.make_step(x0)
     y_next = simulator.make_step(u0)
     x0 = estimator.make_step(y_next)
-    x_traj[k,] = x0.T
+    x_traj[k] = x0
 
 
 
-if True:
+if use_own_plot:
     import matplotlib.pyplot as plt
     
     t = np.arange(0,N)
