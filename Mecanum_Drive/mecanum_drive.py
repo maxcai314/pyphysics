@@ -91,9 +91,17 @@ class Robot():
         output[4] = pos + rotation @ np.array([[self.L],[self.l]])
         return output
    
-    def plot_evolution(self, fig=None, ax1=None, ax2=None, block=False):
+    def plot_evolution(self, fig=None, block=False):
         if fig==None:
             fig, (ax1, ax2) = plt.subplots(2)
+        elif len(fig.axes) < 2:
+            if len(fig.axes) > 0:
+                fig.axes[0].remove()
+            ax1 = fig.add_subplot(2,1,1)
+            ax2 = fig.add_subplot(2,1,2)
+        else:
+            ax1 = fig.axes[0]
+            ax2 = fig.axes[1]
         
         ax1.plot([0, np.max(self.t)],[0,0],'k')
         ax1.plot(self.t, self.q_r[:,0,0],'b', label='X position')
@@ -108,20 +116,19 @@ class Robot():
         ax2.plot(self.t, self.q_rdot[:,2,0],'g', label='Psi velocity')
         ax2.legend()
         ax2.set_xlabel('t')
-        
         plt.show(block=block)
     
     def plot_trajectory(self, fig=None, block=False, drawrobot = True):
         if fig==None:
             fig = plt.figure()
+        else:
+            plt.figure(fig.number)
         
         xPos = self.q_r[:,0,0]
         yPos = self.q_r[:,1,0]
 
         maxd = np.max(np.abs(np.array([xPos,yPos])))
         
-        axis = plt.gca()
-        axis.set_aspect('equal')
         plt.xlim(-1.1*maxd,1.1 * maxd)
         plt.ylim(-1.1*maxd,1.1 * maxd)
         plt.plot(xPos,yPos,'b')
@@ -131,6 +138,7 @@ class Robot():
         if drawrobot:
             plt.plot(self.get_robot_outline(self.q_r[0])[:,0],self.get_robot_outline(self.q_r[0])[:,1],"purple")
             plt.plot(self.get_robot_outline(self.q_r[-1])[:,0],self.get_robot_outline(self.q_r[-1])[:,1],"red")
+        plt.gca().set_aspect('equal')
         plt.show(block=block)
 
 if __name__ == "__main__":
@@ -145,6 +153,9 @@ if __name__ == "__main__":
     q_r0 = np.array([[0],[0],[0]])
     q_rdot0 = np.array([[1],[1],[2]])
     
+    fig1, axis = plt.subplots(2)
+    fig2=plt.figure()
+    
     robot.time_integrate(q_r0, q_rdot0, Gamma, N)
-    robot.plot_evolution()
-    robot.plot_trajectory()
+    robot.plot_evolution(fig=fig1)
+    robot.plot_trajectory(fig=fig2)
