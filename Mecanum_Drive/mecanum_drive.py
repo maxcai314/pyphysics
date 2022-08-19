@@ -52,7 +52,7 @@ class Robot():
         return np.diag([self.m+self.I_w[0] * 4 * self.r**-2, self.m+self.I_w[0] * 4 * self.r**-2,self.I_z+ self.I_w[0] * 4 * (self.l+self.L)**2 * self.r**-2])
     
     def K_div_psidot_analytic(self):
-        return np.matrix([[0,self.I_w[0] * 4 * self.r**-2 ,0],[self.I_w[0] * 4 * self.r**-2,0,0],[0,0,0]])
+        return np.matrix([[0,self.I_w[0] * 4 * self.r**-2 ,0],[-self.I_w[0] * 4 * self.r**-2,0,0],[0,0,0]])
     
     def time_integrate(self,q_r0, q_rdot0, Gamma, N, dt=1E-2):
         self.N = N
