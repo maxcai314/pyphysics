@@ -14,8 +14,7 @@ robot = Robot()
 N = int(1E3)
 Gamma = np.zeros((N,4,1))
 for i in range(N):
-    Gamma[i] = robot.convert_target_control_heading_to_torque(np.array([[0.075],[0.],[-0.0714285714]]))
-    #robot.convert_target_control_heading_to_torque takes in 3x1 column vector for x, y, and phi
+    Gamma[i] = robot.control_heading_to_torque(np.array([[0.075],[0.],[-0.0714285714]]))
 q_r0 = np.array([[0],[0],[0]])
 q_rdot0 = np.array([[1],[1],[2]])
 
