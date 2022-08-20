@@ -88,10 +88,15 @@ class Robot():
         
         for i in range(1,self.N):
             self.q_d[i] = self.q_d[i-1] + self.dt * (self.R_d @ (self.rotationmatrix(self.q_r[i-1,2,0]).T @ self.q_rdot[i-1]))
-        
-        
-            
-        
+    
+    def predict_position_from_odometry(self, q_d_ext):
+        N = q_d_ext.shape[0]
+        q_r_predict = np.zeros((N,3,1))
+        for i in range(1,N):
+            dq_d = q_d_ext[i] - q_d_ext[i-1]
+            dq_r = self.rotationmatrix(q_r_predict[i-1,2,0]) @ (np.linalg.inv(self.R_d) @ dq_d) 
+            q_r_predict[i] = q_r_predict[i-1] + dq_r
+        return q_r_predict
     
     def control_heading_to_torque(self, q_rddot_heading):
         return self.R @ q_rddot_heading
