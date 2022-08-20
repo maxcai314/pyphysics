@@ -23,12 +23,16 @@ robot.time_integrate(q_r0, q_rdot0, Gamma, N)
 
 robot.simulate_odometry()
 
-q_r_predict = np.zeros((robot.N,3,1))
-for i in range(1,robot.N):
-    dq_d = robot.q_d[i] - robot.q_d[i-1]
-    dq_r = robot.rotationmatrix(q_r_predict[i-1,2,0]) @ (np.linalg.inv(robot.R_d) @ dq_d) 
-    q_r_predict[i] = q_r_predict[i-1] + dq_r
+def predict_position_from_odometry(q_d, R_d, rotationmatrix):
+    N = q_d.shape[0]
+    q_r_predict = np.zeros((N,3,1))
+    for i in range(1,N):
+        dq_d = q_d[i] - q_d[i-1]
+        dq_r = rotationmatrix(q_r_predict[i-1,2,0]) @ (np.linalg.inv(R_d) @ dq_d) 
+        q_r_predict[i] = q_r_predict[i-1] + dq_r
+    return q_r_predict
 
+q_r_predict = predict_position_from_odometry(robot.q_d, robot.R_d, robot.rotationmatrix)
 final_error = robot.q_r[-1] - q_r_predict[-1]
 print('Error between estimates')
 print(final_error)
