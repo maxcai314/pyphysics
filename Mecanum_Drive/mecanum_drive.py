@@ -58,8 +58,8 @@ class Robot():
         self.N = N
         self.dt = dt
         self.t = np.arange(0, self.N*self.dt, self.dt)
-        self.q_r = np.zeros((N,3,1))
-        self.q_rdot = np.zeros((N,3,1))
+        self.q_r = np.zeros((self.N,3,1))
+        self.q_rdot = np.zeros((self.N,3,1))
         self.q_r[0] = q_r0
         self.q_rdot[0] = q_rdot0
         
@@ -77,6 +77,22 @@ class Robot():
             self.q_rdot[i] = self.q_rdot[i-1] + self.q_rddot * self.dt
             self.q_r[i] = self.q_r[i-1] + self.q_rdot[i-1] * self.dt
         
+    def simulate_odometry(self,d1=0.1,d2=-0.1,S3=-0.1,r_odo=0.05):
+        self.d1 = d1
+        self.d2 = d2
+        self.S3 = S3
+        self.r_odo = r_odo
+        
+        self.R_d = 1./self.r_odo * np.array([[1,0,-d1],[1,0,-d2],[0,1,S3]])
+        self.q_d = np.zeros((self.N,3,1))
+        
+        for i in range(1,self.N):
+            self.q_d[i] = self.q_d[i-1] + self.dt * (self.R_d @ (self.rotationmatrix(self.q_r[i-1,2,0]).T @ self.q_rdot[i-1]))
+        
+        
+            
+        
+    
     def control_heading_to_torque(self, q_rddot_heading):
         return self.R @ q_rddot_heading
    
