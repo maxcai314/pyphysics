@@ -32,7 +32,8 @@ def predict_position_from_odometry(q_d, R_d, rotationmatrix):
         q_r_predict[i] = q_r_predict[i-1] + dq_r
     return q_r_predict
 
-q_r_predict = predict_position_from_odometry(robot.q_d, robot.R_d, robot.rotationmatrix)
+q_d_coarse = robot.q_d[0::10]
+q_r_predict = predict_position_from_odometry(q_d_coarse, robot.R_d, robot.rotationmatrix)
 final_error = robot.q_r[-1] - q_r_predict[-1]
 print('Error between estimates')
 print(final_error)
