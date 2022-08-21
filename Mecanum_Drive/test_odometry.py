@@ -23,8 +23,25 @@ robot.time_integrate(q_r0, q_rdot0, Gamma, N)
 
 robot.simulate_odometry()
 
-q_d_coarse = robot.q_d[0::10]
-q_r_predict = robot.predict_position_from_odometry(q_d_coarse)
+coarseness = 20
+t_coarse = robot.t[0::coarseness]
+q_d_coarse = robot.q_d[0::coarseness]
+# q_r_predict = robot.predict_position_from_odometry(q_d_coarse)
+
+def odometry_curve(t,t_coarse,q_d_coarse):
+    q_d_interp = np.zeros((3,1))
+    for i in range(3):
+        q_d_interp[i] = np.interp(t,t_coarse,q_d_coarse[:,i,0])
+    return q_d_interp
+
+q_r_predict = robot.predict_position_from_odometry(robot.t,odometry_curve,t_coarse,q_d_coarse)
+
+# N_interp = 100
+# t_interp = np.arange(N_interp)/N_interp * 5
+# q_d_interp = np.zeros((N_interp,3,1))
+# for i in range(N_interp):
+#     q_d_interp[i] = odometry_curve(t_interp[i],t_coarse,q_d_coarse)
+
 final_error = robot.q_r[-1] - q_r_predict[-1]
 print('Error between estimates')
 print(final_error)
@@ -51,3 +68,13 @@ plt.title('Compare Trajectory')
 plt.legend()
 plt.gca().set_aspect('equal')
 plt.show()
+
+# fig3 = plt.figure(3)
+# plt.plot(t_interp,q_d_interp[:,0,:],'r',label = 'Left Wheel')
+# plt.plot(t_interp,q_d_interp[:,1,:],'b',label = 'Right Wheel')
+# plt.plot(t_interp,q_d_interp[:,2,:],'g',label = 'Back Wheel')
+# plt.xlabel('t')
+# plt.ylabel('odometry wheel angle')
+# plt.title('Odometry Interpolated')
+# plt.legend()
+# plt.show()
