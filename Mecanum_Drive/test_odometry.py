@@ -7,6 +7,7 @@ Created on Fri Aug 19 21:12:30 2022
 """
 
 import numpy as np
+from scipy import interpolate
 import matplotlib.pyplot as plt
 from mecanum_drive import Robot
 
@@ -23,7 +24,7 @@ robot.time_integrate(q_r0, q_rdot0, Gamma, N)
 
 robot.simulate_odometry()
 
-coarseness = 20
+coarseness = 100
 t_coarse = robot.t[0::coarseness]
 q_d_coarse = robot.q_d[0::coarseness]
 # q_r_predict = robot.predict_position_from_odometry(q_d_coarse)
@@ -34,13 +35,16 @@ def odometry_curve(t,t_coarse,q_d_coarse):
         q_d_interp[i] = np.interp(t,t_coarse,q_d_coarse[:,i,0])
     return q_d_interp
 
-q_r_predict = robot.predict_position_from_odometry(robot.t,odometry_curve,t_coarse,q_d_coarse)
+odometry_function = interpolate.interp1d(t_coarse,q_d_coarse,kind="cubic",axis=0,fill_value="extrapolate")
 
-# N_interp = 100
-# t_interp = np.arange(N_interp)/N_interp * 5
+q_r_predict = robot.predict_position_from_odometry(robot.t,odometry_function)
+
+N_interp = 100
+t_interp = np.arange(N_interp)/N_interp * 5
+q_d_interp = odometry_function(t_interp)
 # q_d_interp = np.zeros((N_interp,3,1))
 # for i in range(N_interp):
-#     q_d_interp[i] = odometry_curve(t_interp[i],t_coarse,q_d_coarse)
+    # q_d_interp[i] = odometry_curve(t_interp[i],t_coarse,q_d_coarse)
 
 final_error = robot.q_r[-1] - q_r_predict[-1]
 print('Error between estimates')
