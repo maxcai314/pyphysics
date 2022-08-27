@@ -42,15 +42,15 @@ class Pendulum():
     def evolve(self,x,control):
         output = np.zeros((2,1))
         output[0] = x[0] + self.dt * x[1] - self.dt**2 * self.k * np.sin(x[0])
-        output[1] = x[1] - self.dt * self.k * np.sin(x[0]) + self.dt * control
+        output[1] = x[1] - self.dt * self.k * np.sin(x[0]) + np.array([self.dt * control])
         return output
     
     def simulate(self,control):
-        self.x = self.evolve(self.x,control)
+        self.control = -self.decay * self.x[1]
+        self.x = self.evolve(self.x,control + self.control)
         self.epsilon = np.array([np.random.multivariate_normal(np.array([0,0]),self.R)]).T
         self.delta = np.random.normal(0,np.sqrt(self.Q))
         self.x += self.epsilon
-        self.control = -self.decay * self.x
         self.record_x = np.append(self.record_x,self.x)
         
 
@@ -60,7 +60,8 @@ class Pendulum():
     
     def kalman_filter(self):
         mu_pred = np.zeros((2,1))
-        G = np.array([[1-self.k*self.dt**2 * np.cos(self.mu[0]),self.dt],[-self.k * self.dt * np.cos(self.mu[0]), 1-self.decay * self.dt]]) #Jacobian of evolution function
+        G = np.array([[1-self.k*self.dt**2 * np.cos(self.mu[0][0]),self.dt],
+                      [-self.k * self.dt * np.cos(self.mu[0][0]), 1-self.decay * self.dt]]) #Jacobian of evolution function
         #prediction
         mu_pred = self.evolve(self.mu,self.control)
         Sigma_pred = G @ self.Sigma @ G.T + self.R
@@ -87,8 +88,8 @@ t = pendulum.dt * np.arange(N) #fix
 plt.figure(1)
 
 plt.plot(t, pendulum.record_z, 'r', label = 'theta measured')
-plt.plot(t, pendulum.record_x[:,0], 'b', label = 'theta')
-plt.plot(t, pendulum.record_mu[:,0], 'g', label = 'theta estimate')
+plt.plot(t, pendulum.record_x[0::2], 'b', label = 'theta')
+plt.plot(t, pendulum.record_mu[0::2], 'g', label = 'theta estimate')
 # plt.plot(t, pendulum.x[:,1], 'b', label = 'omega')
 # plt.plot(t, pendulum.mu[:,1], 'g', label = 'omega estimate')
 plt.plot([0, np.max(t)],[0,0],'k')
@@ -105,9 +106,9 @@ plt.title('Pendulum EKF')
 # plt.title('Pendulum EKF error')
 
 plt.figure(3)
-plt.plot(t,pendulum.record_Sigma[:,0,0],'b',label = 'theta variance')
-plt.plot(t,pendulum.record_Sigma[:,0,1],'g',label = 'theta and omega covariance')
-plt.plot(t,pendulum.record_Sigma[:,1,1],'r',label = 'omega variance')
+plt.plot(t,pendulum.record_Sigma[0::4],'b',label = 'theta variance')
+plt.plot(t,pendulum.record_Sigma[1::4],'g',label = 'theta and omega covariance')
+plt.plot(t,pendulum.record_Sigma[3::4],'r',label = 'omega variance')
 plt.legend()
 plt.xlabel('t')
 plt.title('EKF Covariance')
