@@ -36,8 +36,9 @@ def odometry_curve(t,t_coarse,q_d_coarse):
     return q_d_interp
 
 odometry_function = interpolate.interp1d(t_coarse,q_d_coarse,kind="cubic",axis=0,fill_value="extrapolate")
-
-q_r_predict = robot.predict_position_from_odometry(robot.t,odometry_function)
+dt_integrate = 5E-4
+t_integrate = np.arange(0, robot.t[-1], dt_integrate)
+q_r_predict = robot.predict_position_from_odometry(t_integrate,odometry_function)
 
 N_interp = 100
 t_interp = np.arange(N_interp)/N_interp * 5
