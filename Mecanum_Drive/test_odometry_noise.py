@@ -15,14 +15,27 @@ robot = Robot()
 
 N = int(1E3)
 Gamma = np.zeros((N,4,1))
-for i in range(500):
-    Gamma[i] = robot.control_heading_to_torque(np.array([[0.075],[0.],[-0.0714285714]]))
-for i in range(500,700):
-    Gamma[i] = robot.control_heading_to_torque(np.array([[-1],[0.5],[0.7]]))
-for i in range(700,N):
-    Gamma[i] = robot.control_heading_to_torque(np.array([[-2],[0.5],[0.5]]))
-q_r0 = np.array([[0],[0],[0]])
-q_rdot0 = np.array([[1],[1],[2]])
+for i in range(50):
+    Gamma[i] = robot.control_heading_to_torque(np.array([[1],[0],[1]]))
+for i in range(50,150):
+    Gamma[i] = robot.control_heading_to_torque(np.array([[1],[0],[-1]]))
+for i in range(150,200):
+    Gamma[i] = robot.control_heading_to_torque(np.array([[1],[0],[1]]))
+for i in range(200,350):
+    Gamma[i] = robot.control_heading_to_torque(np.array([[1],[0],[-1]]))
+for i in range(350,400):
+    Gamma[i] = robot.control_heading_to_torque(np.array([[1],[0],[1]]))
+for i in range(400,450):
+    Gamma[i] = robot.control_heading_to_torque(np.array([[1],[0],[-2]]))
+for i in range(450,500):
+    Gamma[i] = robot.control_heading_to_torque(np.array([[1],[0],[1]]))
+for i in range(500,550):
+    Gamma[i] = robot.control_heading_to_torque(np.array([[1],[0],[-1]]))
+for i in range(550,600):
+    Gamma[i] = robot.control_heading_to_torque(np.array([[1],[0],[-1]]))
+
+q_r0 = np.array([[0],[-2],[0]])
+q_rdot0 = np.array([[0],[0],[0]])
 
 robot.time_integrate(q_r0, q_rdot0, Gamma, N)
 
@@ -43,19 +56,21 @@ def odometry_curve(t,t_coarse,q_d_coarse):
         q_d_interp[i] = np.interp(t,t_coarse,q_d_coarse[:,i,0])
     return q_d_interp
 
-odometry_function = interpolate.interp1d(t_coarse,q_d_coarse,kind="cubic",axis=0,fill_value="extrapolate")
+odometry_function_cubic = interpolate.interp1d(t_coarse,q_d_coarse,kind="cubic",axis=0,fill_value="extrapolate")
+odometry_function_regular = interpolate.interp1d(t_coarse,q_d_coarse,kind="nearest",axis=0,fill_value="extrapolate")
 dt_integrate = 5E-4
 t_integrate = np.arange(0, robot.t[-1], dt_integrate)
-q_r_predict = robot.predict_position_from_odometry(t_integrate,odometry_function)
+q_r_predict_cubic = robot.predict_position_from_odometry(t_integrate,odometry_function_cubic,x0=q_r0)
+q_r_predict_regular = robot.predict_position_from_odometry(t_integrate,odometry_function_regular,x0=q_r0)
 
 N_interp = 1000
 t_interp = np.arange(N_interp)/N_interp * 5
-q_d_interp = odometry_function(t_interp)
+q_d_interp = odometry_function_cubic(t_interp)
 # q_d_interp = np.zeros((N_interp,3,1))
 # for i in range(N_interp):
     # q_d_interp[i] = odometry_curve(t_interp[i],t_coarse,q_d_coarse)
 
-final_error = robot.q_r[-1] - q_r_predict[-1]
+final_error = robot.q_r[-1] - q_r_predict_cubic[-1]
 print('Error between estimates')
 print(final_error)
 
@@ -73,8 +88,9 @@ fig2 = plt.figure(2)
 maxd = np.max(np.abs(np.array([robot.q_r[:,0,0],robot.q_r[:,1,0]])))
 plt.xlim(-1.1*maxd,1.1 * maxd)
 plt.ylim(-1.1*maxd,1.1 * maxd)
-plt.plot(q_r_predict[:,0,0],q_r_predict[:,1,0],'r',linewidth=4,label='predict')
 plt.plot(robot.q_r[:,0,0],robot.q_r[:,1,0],'b',label='actual')
+plt.plot(q_r_predict_regular[:,0,0],q_r_predict_regular[:,1,0],'g',label='predict raw data',alpha=0.4)
+plt.plot(q_r_predict_cubic[:,0,0],q_r_predict_cubic[:,1,0],'r',label='predict interpolated',alpha=0.4)
 plt.xlabel('X')
 plt.ylabel('Y')
 plt.title('Compare Trajectory')
