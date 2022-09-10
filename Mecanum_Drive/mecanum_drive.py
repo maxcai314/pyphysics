@@ -98,9 +98,10 @@ class Robot():
     #         q_r_predict[i] = q_r_predict[i-1] + dq_r
     #     return q_r_predict
     
-    def predict_position_from_odometry(self, t_ext, q_d_funct):
+    def predict_position_from_odometry(self, t_ext, q_d_funct,x0 = np.zeros((3,1))):
         N = t_ext.shape[0]
         q_r_predict = np.zeros((N,3,1))
+        q_r_predict[0] = x0
         for i in range(1,N):
             dq_d = q_d_funct(t_ext[i]) - q_d_funct(t_ext[i-1])
             dq_r = self.rotationmatrix(q_r_predict[i-1,2,0]) @ (np.linalg.inv(self.R_d) @ dq_d) 
