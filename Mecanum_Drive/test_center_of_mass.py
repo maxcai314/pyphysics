@@ -32,6 +32,9 @@ robot_real_adjusted = Robot(m=100.,I_z=200.,x_center=0.1,y_center=0)
 Gamma_adjusted = np.zeros((N,4,1))
 for i in range(N):
     Gamma_adjusted[i] = robot_real_adjusted.control_heading_to_torque(np.array([[0.],[0.1],[0.]]))
+    # uses this robot's dimensions to calculate what should be the ideal motor powers
+    # doesn't seem to actually fix the issue, for whatever reason
+    # maybe this issue is with the physics model itself?
 q_r0 = np.array([[0],[0],[0]])
 q_rdot0 = np.array([[0],[0],[0]])
 robot_real_adjusted.time_integrate(q_r0, q_rdot0, Gamma_adjusted, N)
