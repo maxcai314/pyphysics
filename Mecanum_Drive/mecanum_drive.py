@@ -13,9 +13,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 class Robot():
-    def __init__(self,L=0.2,l=0.15,r=0.05,m=5,I_z=3,
+    def __init__(self,L=0.2,l=0.15,r=0.05,m=5.,I_z=3.,
                  I_w=[0.05,0.05,0.05,0.05],
-                 S=None,d=None,alpha=None,
+                 S_geometric=None,d_geometric=None,alpha=None,
+                 x_center=0., y_center=0.,
                  friction=0.1):
         self.L=L
         self.l=l
@@ -23,20 +24,26 @@ class Robot():
         self.m=m
         self.I_z=I_z
         self.I_w = I_w
-        self.S = S
-        self.d = d
+        self.S_geometric = S_geometric
+        self.d_geometric = d_geometric
         self.alpha = alpha
         self.friction=friction
         
         self.M_r = np.diag([self.m,self.m,self.I_z])
         self.M_w = np.diag(self.I_w)
         
-        if self.S==None:
-            self.S = [self.L, self.L, -self.L, -self.L]
-        if self.d==None:
-            self.d = [self.l, -self.l, self.l, -self.l]
+        if self.S_geometric==None:
+            self.S_geometric = np.array([self.L, self.L, -self.L, -self.L])
+        if self.d_geometric==None:
+            self.d_geometric = np.array([self.l, -self.l, self.l, -self.l])
         if self.alpha==None:
             self.alpha = [0.25 * np.pi, -0.25 * np.pi, -0.25 * np.pi, 0.25 * np.pi]
+        
+        self.x_center = x_center
+        self.y_center = y_center
+        
+        self.S = self.S_geometric - self.x_center
+        self.d = self.d_geometric - self.y_center
         
         self.R = np.zeros((4,3))
         for i in range(4):
@@ -122,7 +129,7 @@ class Robot():
         output[4] = pos + rotation @ np.array([[self.L],[self.l]])
         return output
    
-    def plot_evolution(self, fig=None, block=False):
+    def plot_evolution(self, fig=None, block=False, show=True):
         if fig==None:
             fig, (ax1, ax2) = plt.subplots(2)
         elif len(fig.axes) < 2:
@@ -147,9 +154,10 @@ class Robot():
         ax2.plot(self.t, self.q_rdot[:,2,0],'g', label='Psi velocity')
         ax2.legend()
         ax2.set_xlabel('t')
-        plt.show(block=block)
+        if show:
+            plt.show(block=block)
     
-    def plot_trajectory(self, fig=None, block=False, drawrobot = True):
+    def plot_trajectory(self, fig=None, block=False, drawrobot=True, show=True, linecolor='b', label = None):
         if fig==None:
             fig = plt.figure()
         else:
@@ -160,9 +168,13 @@ class Robot():
 
         maxd = np.max(np.abs(np.array([xPos,yPos])))
         
-        plt.xlim(-1.1*maxd,1.1 * maxd)
-        plt.ylim(-1.1*maxd,1.1 * maxd)
-        plt.plot(xPos,yPos,'b')
+        plt.xlim(-1.2*maxd,1.2 * maxd)
+        plt.ylim(-1.2*maxd,1.2 * maxd)
+        if label==None:
+            plt.plot(xPos,yPos,linecolor)
+        else:
+            plt.plot(xPos,yPos,linecolor,label=label)
+            plt.legend()
         plt.xlabel('X')
         plt.ylabel('Y')
         plt.title('Robot Trajectory')
@@ -170,7 +182,8 @@ class Robot():
             plt.plot(self.get_robot_outline(self.q_r[0])[:,0],self.get_robot_outline(self.q_r[0])[:,1],"purple")
             plt.plot(self.get_robot_outline(self.q_r[-1])[:,0],self.get_robot_outline(self.q_r[-1])[:,1],"red")
         plt.gca().set_aspect('equal')
-        plt.show(block=block)
+        if show:
+            plt.show(block=block)
 
 if __name__ == "__main__":
     robot = Robot()
