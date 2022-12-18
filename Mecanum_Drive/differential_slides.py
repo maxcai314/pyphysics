@@ -68,17 +68,20 @@ class Outtake:
               f'Linear velocity {self.linear_velocity.to("metre/second")}, angular velocity {self.angular_velocity.to("degrees/second")}'
 
 outtake = Outtake() 
-torque_left = 0.503
-torque_right = 0.497
+torque_left = 0.55
+torque_right = 0.55
 
-N = 5000
+N = 10000
 dt = 0.005
 simulation_time = np.arange(0,N)*dt
 state = np.zeros((N,4,1))
-for i in range(N):
+for i in range(0,2500):
     state[i] = outtake.get_state()
     outtake.time_integrate(torque_left, torque_right, dt)
     # print(outtake.to_string())
+for i in range(2500,N):
+    state[i] = outtake.get_state()
+    outtake.time_integrate(0.45, 0.45, dt)
 
 plt.figure()
 angles = state[:,0,0]
