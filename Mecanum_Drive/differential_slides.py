@@ -64,34 +64,35 @@ class Outtake:
         return np.array([[self.angle],[self.height],[self.angular_velocity],[self.linear_velocity]])
 
     def to_string(self):
-        return f'Height {self.height}, angle {self.angle.to("degrees")},' \
-              f'Linear velocity {self.linear_velocity.to("metre/second")}, angular velocity {self.angular_velocity.to("degrees/second")}'
+        return f'Height {self.height}, angle {self.angle},' \
+              f'Linear velocity {self.linear_velocity}, angular velocity {self.angular_velocity}'
 
-outtake = Outtake() 
-torque_left = 0.55
-torque_right = 0.55
-
-N = 10000
-dt = 0.005
-simulation_time = np.arange(0,N)*dt
-state = np.zeros((N,4,1))
-for i in range(0,2500):
-    state[i] = outtake.get_state()
-    outtake.time_integrate(torque_left, torque_right, dt)
-    # print(outtake.to_string())
-for i in range(2500,N):
-    state[i] = outtake.get_state()
-    outtake.time_integrate(0.45, 0.45, dt)
-
-plt.figure()
-angles = state[:,0,0]
-heights = state[:,1,0]
-angular_velocity = state[:,2,0]
-linear_velocity = state[:,3,0]
-plt.plot(simulation_time, angles, 'r', label="angle")
-plt.plot(simulation_time, heights, 'b', label="height")
-plt.xlabel('time')
-plt.ylabel('state')
-plt.title("Outtake")
-plt.legend()
-plt.show()
+if __name__ == "__main__":
+    outtake = Outtake() 
+    torque_left = 0.55
+    torque_right = 0.55
+    
+    N = 10000
+    dt = 0.005
+    simulation_time = np.arange(0,N)*dt
+    state = np.zeros((N,4,1))
+    for i in range(0,2500):
+        state[i] = outtake.get_state()
+        outtake.time_integrate(torque_left, torque_right, dt)
+        # print(outtake.to_string())
+    for i in range(2500,N):
+        state[i] = outtake.get_state()
+        outtake.time_integrate(0.45, 0.45, dt)
+    
+    plt.figure()
+    angles = state[:,0,0]
+    heights = state[:,1,0]
+    angular_velocity = state[:,2,0]
+    linear_velocity = state[:,3,0]
+    plt.plot(simulation_time, angles, 'r', label="angle")
+    plt.plot(simulation_time, heights, 'b', label="height")
+    plt.xlabel('time')
+    plt.ylabel('state')
+    plt.title("Outtake")
+    plt.legend()
+    plt.show()

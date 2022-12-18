@@ -47,18 +47,19 @@ if __name__ == "__main__":
     dt = 0.005
     simulation_time = np.arange(0,N)*dt
     state = np.zeros((N,2,1))
-    for i in range(0,2500):
+    for i in range(0,100000):
         state[i] = motor.get_state()
         motor.time_integrate(12, dt)
-        # print(outtake.to_string())
-    for i in range(2500,N):
-        state[i] = motor.get_state()
-        motor.time_integrate(0, dt)
+        print(motor.to_string())
+    
+    # for i in range(50000,N):
+    #     state[i] = motor.get_state()
+    #     motor.time_integrate(0, dt)
     
     plt.figure()
-    anglular_vel = state[:,0,0]
+    angular_vel = state[:,0,0]
     torque = state[:,1,0]
-    plt.plot(simulation_time, anglular_vel, 'r', label="angular velocity")
+    plt.plot(simulation_time, angular_vel, 'r', label="angular velocity")
     plt.plot(simulation_time, torque, 'b', label="torque")
     plt.xlabel('time')
     plt.ylabel('state')

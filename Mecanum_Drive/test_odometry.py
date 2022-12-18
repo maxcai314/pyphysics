@@ -35,19 +35,22 @@ def odometry_curve(t,t_coarse,q_d_coarse):
         q_d_interp[i] = np.interp(t,t_coarse,q_d_coarse[:,i,0])
     return q_d_interp
 
-odometry_function = interpolate.interp1d(t_coarse,q_d_coarse,kind="cubic",axis=0,fill_value="extrapolate")
+odometry_function_interp = interpolate.interp1d(t_coarse,q_d_coarse,kind="cubic",axis=0,fill_value="extrapolate")
+odometry_function_nointerp = interpolate.interp1d(t_coarse,q_d_coarse,kind="nearest",axis=0,fill_value="extrapolate")
 dt_integrate = 5E-4
 t_integrate = np.arange(0, robot.t[-1], dt_integrate)
-q_r_predict = robot.predict_position_from_odometry(t_integrate,odometry_function,x0=q_r0)
+q_r_predict_interp = robot.predict_position_from_odometry(t_integrate,odometry_function_interp,x0=q_r0)
+q_r_predict_nointerp = robot.predict_position_from_odometry(t_integrate,odometry_function_nointerp)
 
 N_interp = 100
 t_interp = np.arange(N_interp)/N_interp * 5
-q_d_interp = odometry_function(t_interp)
+q_d_interp = odometry_function_interp(t_interp)
+q_d_nointerp = odometry_function_nointerp(t_interp)
 # q_d_interp = np.zeros((N_interp,3,1))
 # for i in range(N_interp):
     # q_d_interp[i] = odometry_curve(t_interp[i],t_coarse,q_d_coarse)
 
-final_error = robot.q_r[-1] - q_r_predict[-1]
+final_error = robot.q_r[-1] - q_r_predict_interp[-1]
 print('Error between estimates')
 print(final_error)
 
@@ -62,11 +65,14 @@ plt.legend()
 plt.show()
 
 fig2 = plt.figure(2)
-maxd = np.max(np.abs(np.array([robot.q_r[:,0,0],robot.q_r[:,1,0]])))
-plt.xlim(-1.1*maxd,1.1 * maxd)
-plt.ylim(-1.1*maxd,1.1 * maxd)
-plt.plot(q_r_predict[:,0,0],q_r_predict[:,1,0],'r',linewidth=4,label='predict')
-plt.plot(robot.q_r[:,0,0],robot.q_r[:,1,0],'b',label='actual')
+# maxd = np.max(np.abs(np.array([robot.q_r[:,0,0],robot.q_r[:,1,0]])))
+# plt.xlim(-1.1*maxd,1.1 * maxd)
+# plt.ylim(-1.1*maxd,1.1 * maxd)
+plt.xlim(-0.5,3.5)
+plt.ylim(-1.5,1.75)
+plt.plot(q_r_predict_nointerp[:,0,0],q_r_predict_nointerp[:,1,0],'m',linewidth=4,label='uninterpolated')
+plt.plot(q_r_predict_interp[:,0,0],q_r_predict_interp[:,1,0],'r',linewidth=4,label='interpolated')
+plt.plot(robot.q_r[:,0,0],robot.q_r[:,1,0],'b',label='actual motion')
 plt.xlabel('X')
 plt.ylabel('Y')
 plt.title('Compare Trajectory')

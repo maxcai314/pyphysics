@@ -51,6 +51,9 @@ class Robot():
     
     def rotationmatrix(self,psi):
         return np.array([[np.cos(psi),-np.sin(psi),0],[np.sin(psi),np.cos(psi),0],[0,0,1]])
+    
+    def rotationmatrixsmall(self,psi):
+        return np.array([[np.cos(psi),-np.sin(psi)],[np.sin(psi),np.cos(psi)]])
 
     def rotationmatrixdot(self,psi,psidot):
         return np.array([[-np.sin(psi),-np.cos(psi),0],[np.cos(psi),-np.sin(psi),0],[0,0,0]]) * psidot
@@ -112,6 +115,36 @@ class Robot():
         for i in range(1,N):
             dq_d = q_d_funct(t_ext[i]) - q_d_funct(t_ext[i-1])
             dq_r = self.rotationmatrix(q_r_predict[i-1,2,0]) @ (np.linalg.inv(self.R_d) @ dq_d) 
+            q_r_predict[i] = q_r_predict[i-1] + dq_r
+        return q_r_predict
+    
+    def predict_position_from_odometry_fancy(self, t_ext, q_d_funct,x0 = np.zeros((3,1))):
+        N = t_ext.shape[0]
+        q_r_predict = np.zeros((N,3,1))
+        q_r_predict[0] = x0
+        for i in range(1,N):
+            dt = t_ext[i]-t_ext[i-1]
+            print("time:")
+            print(t_ext[i])
+            print("dt:")
+            print(dt)
+            q_rdot = (np.linalg.inv(self.R_d) @ q_d_funct(t_ext[i])) - (np.linalg.inv(self.R_d) @ q_d_funct(t_ext[i-1]))
+            psidot = q_rdot[2]
+            print('q_rdot is')
+            print(q_rdot)
+            posdot = np.array([[q_rdot[0,0]],[q_rdot[1,0]]])
+            print('posdot is')
+            print(posdot)
+            integration_matrix = np.zeros((2,2))
+            if psidot == 0:
+                integration_matrix = np.identity(2) * dt
+            else:
+                integration_matrix = np.array([[np.sin(psidot),np.cos(psidot)-1],[1-np.cos(psidot),np.sin(psidot)]])[:,:,0]*dt/psidot
+            print("integration matrix is")
+            print(integration_matrix)
+            print(integration_matrix.shape)
+            dpos = self.rotationmatrixsmall(q_r_predict[i-1,2,0]) @ integration_matrix @ posdot
+            dq_r = np.array([[dpos[0,0]],[dpos[1,0]],[psidot*dt]])
             q_r_predict[i] = q_r_predict[i-1] + dq_r
         return q_r_predict
     
