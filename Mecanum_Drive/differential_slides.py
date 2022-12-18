@@ -11,21 +11,22 @@ import matplotlib.pyplot as plt
 
 class Outtake:
     HIGH_SPOOL_GEAR_RATIO = 3
-    HIGH_SPOOL_RADIUS = 3
-    LOW_SPOOL_RADIUS = 2
+    HIGH_SPOOL_RADIUS = 0.1
+    LOW_SPOOL_RADIUS = 0.05
 
-    FOURBAR_COM_RADIUS = .1
-    FOURBAR_MASS = .5
-    SLIDES_MASS = .5
+    FOURBAR_COM_RADIUS = .15
+    FOURBAR_MASS = 1
+    SLIDES_MASS = 1
 
     GRAVITY = 10
 
     
-    def __init__(self):
-        self.angle = 0
-        self.angular_velocity = 0
-        self.height = 0
-        self.linear_velocity = 0
+    def __init__(self, initial_angle = 0, initial_height = 0, initial_angular_velocity = 0, initial_linear_velocity = 0):
+        self.angle = initial_angle
+        self.height = initial_height
+        self.angular_velocity = initial_angular_velocity
+        self.linear_velocity = initial_linear_velocity
+        
 
     def fourbar_torque(self, tension_left, tension_right):
         return self.HIGH_SPOOL_GEAR_RATIO * (tension_left - tension_right) * self.HIGH_SPOOL_RADIUS
@@ -39,7 +40,7 @@ class Outtake:
                 - (self.SLIDES_MASS + self.FOURBAR_MASS) * self.GRAVITY
                 + 1 / self.FOURBAR_COM_RADIUS * self.fourbar_torque(tension_left, tension_right) * np.sin(self.angle)
                 + self.slides_force(tension_left, tension_right)) \
-            / (self.SLIDES_MASS + self.FOURBAR_MASS * np.cos(self.angle)**2)
+    / (self.SLIDES_MASS + self.FOURBAR_MASS * np.cos(self.angle)**2)
 
     def angular_acceleration(self, tension_left, tension_right):
         return (-self.GRAVITY / self.FOURBAR_COM_RADIUS * np.sin(self.angle)
@@ -58,24 +59,36 @@ class Outtake:
 
         self.linear_velocity += linear_acceleration * time_step
         self.angular_velocity += angular_acceleration * time_step
+    
+    def get_state(self):
+        return np.array([[self.angle],[self.height],[self.angular_velocity],[self.linear_velocity]])
 
     def to_string(self):
         return f'Height {self.height}, angle {self.angle.to("degrees")},' \
               f'Linear velocity {self.linear_velocity.to("metre/second")}, angular velocity {self.angular_velocity.to("degrees/second")}'
 
-outtake = Outtake()
-torque_left = 1
-torque_right = 1
+outtake = Outtake() 
+torque_left = 0.503
+torque_right = 0.497
 
-for i in np.arange(0, 10, step = .1):
-    outtake.time_integrate(torque_left, torque_right, .1)
+N = 5000
+dt = 0.005
+simulation_time = np.arange(0,N)*dt
+state = np.zeros((N,4,1))
+for i in range(N):
+    state[i] = outtake.get_state()
+    outtake.time_integrate(torque_left, torque_right, dt)
     # print(outtake.to_string())
 
-
-
-
-
-
-
-
-
+plt.figure()
+angles = state[:,0,0]
+heights = state[:,1,0]
+angular_velocity = state[:,2,0]
+linear_velocity = state[:,3,0]
+plt.plot(simulation_time, angles, 'r', label="angle")
+plt.plot(simulation_time, heights, 'b', label="height")
+plt.xlabel('time')
+plt.ylabel('state')
+plt.title("Outtake")
+plt.legend()
+plt.show()
