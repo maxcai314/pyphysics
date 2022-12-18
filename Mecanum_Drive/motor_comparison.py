@@ -48,11 +48,11 @@ if __name__ == '__main__':
 
 
     plt.figure()
-    plt.plot(time, angular_vel_real - angular_vel_pred, 'g', label="error")
+    # plt.plot(time, angular_vel_real - angular_vel_pred, 'g', label="error")
     plt.plot(time, angular_vel_real, 'r', label="real")
     plt.plot(time, angular_vel_pred, 'b', label="pred")
     plt.xlabel('time')
-    plt.ylabel('error (rad/s)')
-    plt.title("Simulation error")
+    plt.ylabel('(rad/s)')
+    plt.title("Motor speed")
     plt.legend()
     plt.show()
