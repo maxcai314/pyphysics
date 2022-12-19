@@ -20,14 +20,18 @@ class Motor:
 
         self.torque = 0
         self.angular_vel = 0
+        self.current = 0
+
         self.last_voltage = 0
+        self.last_current = 0
 
     # [diff(T(t), t) == (B_m*K_T*e_a(t) + J_m*K_T*diff(E_a(s), s) - (K_T^2 + B_m*R_a)*T(t))/(J_m*R_a)]
     def torque_dot(self, voltage, voltage_dot):
         return (
                 (self.viscous_friction * self.motor_constant * voltage) +
                 (self.moment_of_inertia * self.motor_constant * voltage_dot) -
-                (self.motor_constant * self.motor_constant + self.viscous_friction * self.armature_resistance) * self.torque
+                (
+                        self.motor_constant * self.motor_constant + self.viscous_friction * self.armature_resistance) * self.torque
         ) / (self.moment_of_inertia * self.armature_resistance)
 
     # (K_T*E_a(t) - (K_T^2 + B_m*R_a)*O(t))/(J_m*R_a)
@@ -37,13 +41,25 @@ class Motor:
                 (self.motor_constant ** 2 + self.viscous_friction * self.armature_resistance) * self.angular_vel
         ) / (self.moment_of_inertia * self.armature_resistance)
 
+    # (B_m*e_a(t) - (K_T^2 + B_m*R_a)*i_a(t) + J_m*diff(e_a(t), t))/(J_m*R_a)
+    def current_dot(self, voltage, time_step):
+        return (
+                self.viscous_friction * voltage -
+                (self.motor_constant ** 2 + self.viscous_friction * self.armature_resistance) * self.current +
+                self.moment_of_inertia * (voltage - self.last_voltage) / time_step
+        )
+
     def time_integrate_(self, voltage, time_step):
         torque_dot = self.torque_dot(voltage, (voltage - self.last_voltage) / time_step)
         angular_vel_dot = self.angular_vel_dot(voltage)
+        current_dot = self.current_dot(voltage, time_step)
 
         self.torque += torque_dot * time_step
         self.angular_vel += angular_vel_dot * time_step
+        self.current += current_dot * time_step
+
         self.last_voltage = voltage
+
     def time_integrate(self, voltage, time_step):
         if time_step < .01:
             self.time_integrate_(voltage, time_step)
@@ -54,8 +70,8 @@ class Motor:
                 self.time_integrate_(voltage, .01)
                 curr_time += .01
 
-            self.time_integrate_(voltage, time_step - curr_time)
-
+            if time_step - curr_time != 0:
+                self.time_integrate_(voltage, time_step - curr_time)
 
     def get_state(self):
         return np.array([[self.angular_vel], [self.torque]])

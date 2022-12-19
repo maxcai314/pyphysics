@@ -49,10 +49,9 @@ if __name__ == '__main__':
 
     plt.figure()
     # plt.plot(time, angular_vel_real - angular_vel_pred, 'g', label="error")
-    plt.plot(time, angular_vel_real, 'r', label="real")
-    plt.plot(time, angular_vel_pred, 'b', label="pred")
+    plt.plot(time, angular_vel_real, 'r', label="Real motor velocity")
+    plt.plot(time, angular_vel_pred, 'b', label="Predicted motor velocity")
     plt.xlabel('time')
-    plt.ylabel('(rad/s)')
-    plt.title("Motor speed")
+    plt.title("Real motor speed vs predicted - ramp signals")
     plt.legend()
     plt.show()
