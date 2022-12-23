@@ -10,6 +10,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 GRAVITY = 9.8
+STRING_VISCOUS_FRICTION = .1
 
 
 class DifferentialSlides:
@@ -55,10 +56,13 @@ class DifferentialSlides:
     # (m2**2*r**2*theta_dot**2*cos(theta)*sin(theta) - f_s*m2*r*sin(theta) + f_theta*m1 + f_theta*m2)/(m2**2*r**2*cos(theta)**2 + m1*m2*r**2)
     def angular_acceleration(self, tension_left, tension_right):
         return (
-                (self.FOURBAR_MASS * self.FOURBAR_COM_RADIUS * self.angular_velocity)**2 * np.cos(self.angle) * np.sin(self.angle)
-                - self.slides_force(tension_left, tension_right) * self.FOURBAR_MASS * self.FOURBAR_COM_RADIUS * np.sin(self.angle)
+                (self.FOURBAR_MASS * self.FOURBAR_COM_RADIUS * self.angular_velocity) ** 2 * np.cos(
+            self.angle) * np.sin(self.angle)
+                - self.slides_force(tension_left, tension_right) * self.FOURBAR_MASS * self.FOURBAR_COM_RADIUS * np.sin(
+            self.angle)
                 + self.fourbar_torque(tension_left, tension_right) * (self.SLIDES_MASS + self.FOURBAR_MASS)
-                ) / ((self.FOURBAR_MASS * self.FOURBAR_COM_RADIUS * np.cos(self.angle))**2 + self.FOURBAR_MASS * self.SLIDES_MASS * self.FOURBAR_COM_RADIUS**2)
+        ) / ((self.FOURBAR_MASS * self.FOURBAR_COM_RADIUS * np.cos(
+            self.angle)) ** 2 + self.FOURBAR_MASS * self.SLIDES_MASS * self.FOURBAR_COM_RADIUS ** 2)
 
     def time_integrate(self, torque_left, torque_right, time_step):
         tension_left = torque_left / self.LOW_SPOOL_RADIUS

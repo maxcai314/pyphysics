@@ -2,7 +2,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 
 from motor_simulation import Motor
-from differential_slides import DifferentialSlides
+from differential_slides import DifferentialSlides, GRAVITY
 
 
 class Outtake(DifferentialSlides):
