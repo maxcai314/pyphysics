@@ -11,22 +11,23 @@ from scipy import interpolate
 import matplotlib.pyplot as plt
 from mecanum_drive import Robot
 
-robot = Robot()
+q_r0 = np.array([[0],[0],[0]])
+q_rdot0 = np.array([[1],[1],[2]])
+
+robot = Robot(q_r=q_r0, q_rdot=q_rdot0)
 
 N = int(1E3)
 Gamma = np.zeros((N,4,1))
 for i in range(N):
     Gamma[i] = robot.control_heading_to_torque(np.array([[0.075],[0.],[-0.0714285714]]))
-q_r0 = np.array([[0],[0],[0]])
-q_rdot0 = np.array([[1],[1],[2]])
 
-robot.time_integrate(q_r0, q_rdot0, Gamma, N)
+robot.time_integrate_steps(Gamma, N)
 
-robot.simulate_odometry()
+robot.simulate_odometry_from_list()
 
 coarseness = 100
-t_coarse = robot.t[0::coarseness]
-q_d_coarse = robot.q_d[0::coarseness]
+t_coarse = robot.t_list[0::coarseness]
+q_d_coarse = robot.q_d_list[0::coarseness]
 # q_r_predict = robot.predict_position_from_odometry(q_d_coarse)
 
 def odometry_curve(t,t_coarse,q_d_coarse):
@@ -38,7 +39,7 @@ def odometry_curve(t,t_coarse,q_d_coarse):
 odometry_function_interp = interpolate.interp1d(t_coarse,q_d_coarse,kind="cubic",axis=0,fill_value="extrapolate")
 odometry_function_nointerp = interpolate.interp1d(t_coarse,q_d_coarse,kind="nearest",axis=0,fill_value="extrapolate")
 dt_integrate = 5E-4
-t_integrate = np.arange(0, robot.t[-1], dt_integrate)
+t_integrate = np.arange(0, robot.t_list[-1], dt_integrate)
 q_r_predict_interp = robot.predict_position_from_odometry(t_integrate,odometry_function_interp,x0=q_r0)
 q_r_predict_nointerp = robot.predict_position_from_odometry(t_integrate,odometry_function_nointerp)
 
@@ -50,14 +51,14 @@ q_d_nointerp = odometry_function_nointerp(t_interp)
 # for i in range(N_interp):
     # q_d_interp[i] = odometry_curve(t_interp[i],t_coarse,q_d_coarse)
 
-final_error = robot.q_r[-1] - q_r_predict_interp[-1]
+final_error = robot.q_r_list[-1] - q_r_predict_interp[-1]
 print('Error between estimates')
 print(final_error)
 
 fig1 = plt.figure(1)
-plt.plot(robot.t,robot.q_d[:,0,:],'r',label = 'Left Wheel')
-plt.plot(robot.t,robot.q_d[:,1,:],'b',label = 'Right Wheel')
-plt.plot(robot.t,robot.q_d[:,2,:],'g',label = 'Back Wheel')
+plt.plot(robot.t_list,robot.q_d_list[:,0,:],'r',label = 'Left Wheel')
+plt.plot(robot.t_list,robot.q_d_list[:,1,:],'b',label = 'Right Wheel')
+plt.plot(robot.t_list,robot.q_d_list[:,2,:],'g',label = 'Back Wheel')
 plt.xlabel('t')
 plt.ylabel('odometry wheel angle')
 plt.title('Odometry')
@@ -65,14 +66,14 @@ plt.legend()
 plt.show()
 
 fig2 = plt.figure(2)
-# maxd = np.max(np.abs(np.array([robot.q_r[:,0,0],robot.q_r[:,1,0]])))
+# maxd = np.max(np.abs(np.array([robot.q_r_list[:,0,0],robot.q_r[:,1,0]])))
 # plt.xlim(-1.1*maxd,1.1 * maxd)
 # plt.ylim(-1.1*maxd,1.1 * maxd)
 plt.xlim(-0.5,3.5)
 plt.ylim(-1.5,1.75)
 plt.plot(q_r_predict_nointerp[:,0,0],q_r_predict_nointerp[:,1,0],'m',linewidth=4,label='uninterpolated')
 plt.plot(q_r_predict_interp[:,0,0],q_r_predict_interp[:,1,0],'r',linewidth=4,label='interpolated')
-plt.plot(robot.q_r[:,0,0],robot.q_r[:,1,0],'b',label='actual motion')
+plt.plot(robot.q_r_list[:,0,0],robot.q_r_list[:,1,0],'b',label='actual motion')
 plt.xlabel('X')
 plt.ylabel('Y')
 plt.title('Compare Trajectory')

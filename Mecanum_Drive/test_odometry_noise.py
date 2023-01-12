@@ -37,14 +37,14 @@ for i in range(550,600):
 q_r0 = np.array([[0],[-2],[0]])
 q_rdot0 = np.array([[0],[0],[0]])
 
-robot.time_integrate(q_r0, q_rdot0, Gamma, N)
+robot.time_integrate_steps(Gamma, N)
 
-robot.simulate_odometry()
+robot.simulate_odometry_from_list()
 
 #updates at 100hz, coarseness = 100 is 1 update per second
 coarseness = 10
-t_coarse = robot.t[0::coarseness]
-q_d_coarse = robot.q_d[0::coarseness]
+t_coarse = robot.t_list[0::coarseness]
+q_d_coarse = robot.q_d_list[0::coarseness]
 np.random.seed(10)
 standard_deviation_radians = 0.05
 q_d_coarse_noise = np.random.normal(np.zeros((3,1)),standard_deviation_radians,q_d_coarse.shape)
@@ -59,7 +59,7 @@ def odometry_curve(t,t_coarse,q_d_coarse):
 odometry_function_cubic = interpolate.interp1d(t_coarse,q_d_coarse,kind="cubic",axis=0,fill_value="extrapolate")
 odometry_function_regular = interpolate.interp1d(t_coarse,q_d_coarse,kind="nearest",axis=0,fill_value="extrapolate")
 dt_integrate = 5E-4
-t_integrate = np.arange(0, robot.t[-1], dt_integrate)
+t_integrate = np.arange(0, robot.t_list[-1], dt_integrate)
 q_r_predict_cubic = robot.predict_position_from_odometry(t_integrate,odometry_function_cubic,x0=q_r0)
 q_r_predict_regular = robot.predict_position_from_odometry(t_integrate,odometry_function_regular,x0=q_r0)
 
@@ -75,9 +75,9 @@ print('Error between estimates')
 print(final_error)
 
 fig1 = plt.figure(1)
-plt.plot(robot.t,robot.q_d[:,0,:],'r',label = 'Left Wheel')
-plt.plot(robot.t,robot.q_d[:,1,:],'b',label = 'Right Wheel')
-plt.plot(robot.t,robot.q_d[:,2,:],'g',label = 'Back Wheel')
+plt.plot(robot.t_list,robot.q_d_list[:,0,:],'r',label = 'Left Wheel')
+plt.plot(robot.t_list,robot.q_d_list[:,1,:],'b',label = 'Right Wheel')
+plt.plot(robot.t_list,robot.q_d_list[:,2,:],'g',label = 'Back Wheel')
 plt.xlabel('t')
 plt.ylabel('odometry wheel angle')
 plt.title('Odometry')
@@ -85,10 +85,10 @@ plt.legend()
 plt.show()
 
 fig2 = plt.figure(2)
-maxd = np.max(np.abs(np.array([robot.q_r[:,0,0],robot.q_r[:,1,0]])))
+maxd = np.max(np.abs(np.array([robot.q_r_list[:,0,0],robot.q_r_list[:,1,0]])))
 plt.xlim(-1.1*maxd,1.1 * maxd)
 plt.ylim(-1.1*maxd,1.1 * maxd)
-plt.plot(robot.q_r[:,0,0],robot.q_r[:,1,0],'b',label='actual')
+plt.plot(robot.q_r_list[:,0,0],robot.q_r_list[:,1,0],'b',label='actual')
 plt.plot(q_r_predict_regular[:,0,0],q_r_predict_regular[:,1,0],'g',label='predict raw data',alpha=0.4)
 plt.plot(q_r_predict_cubic[:,0,0],q_r_predict_cubic[:,1,0],'r',label='predict interpolated',alpha=0.4)
 plt.xlabel('X')

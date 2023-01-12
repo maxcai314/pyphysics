@@ -17,7 +17,7 @@ Gamma = np.zeros((N,4,1))
 q_r0 = np.array([[0],[0],[0]])
 q_rdot0 = np.array([[1],[1],[2]])
 
-robot.time_integrate(q_r0, q_rdot0, Gamma, N)
+robot.time_integrate_steps(Gamma, N)
 
 print()
 print("H = ")
@@ -31,7 +31,7 @@ else:
 print()
 print("K / psidot = ")
 print(robot.K_div_psidot_analytic())
-max_error_K = np.max(np.abs(robot.K_div_psidot_analytic() - robot.K/robot.q_rdot[-2,2]))
+max_error_K = np.max(np.abs(robot.K_div_psidot_analytic() - robot.K/robot.q_rdot_list[-2,2]))
 if max_error_K < 1E-12:
     print("test H passed")
 else:

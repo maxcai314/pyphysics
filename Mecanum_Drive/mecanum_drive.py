@@ -78,28 +78,47 @@ class Robot():
     def K_div_psidot_analytic(self):
         return np.matrix([[0,self.I_w[0] * 4 * self.r**-2 ,0],[-self.I_w[0] * 4 * self.r**-2,0,0],[0,0,0]])
     
-    def get_aceleration(self, Gamma):
+    def get_aceleration(self, Gamma, angle, q_rdot):
         Rotation = self.rotationmatrix(self.q_r[2,0])
-        Rotationdot = self.rotationmatrixdot(self.q_r[2,0],self.q_rdot[2,0])
+        Rotationdot = self.rotationmatrixdot(angle,q_rdot[2,0])
         
-        q_wdot = self.R @ Rotation.T @ self.q_rdot
+        q_wdot = self.R @ Rotation.T @ q_rdot
         
         self.H = self.M_r + Rotation @ self.R.T @ self.M_w @ self.R @ Rotation.T
         self.K = Rotation @ self.R.T @ self.M_w @ self.R @ Rotationdot.T
         self.F_a = Rotation @ self.R.T @ (Gamma - q_wdot * self.friction)
-        q_rddot = np.linalg.inv(self.H) @ (self.F_a - self.K @ self.q_rdot)
+        q_rddot = np.linalg.inv(self.H) @ (self.F_a - self.K @ q_rdot)
         return q_rddot
     
     def time_integrate(self, Gamma, dt=1E-2):
-        q_rddot = self.get_aceleration(Gamma) #forward euler method
+        q_rddot = self.get_aceleration(Gamma, self.q_r[2,0], self.q_rdot) #forward euler method
+        prev_q_rdot = self.q_rdot
         self.q_rdot = self.q_rdot + q_rddot * dt
-        self.q_r = self.q_r + self.q_rdot * dt
+        self.q_r = self.q_r + prev_q_rdot * dt
         
-    def get_odometry_vel(self, q_r, q_rdot):
-        return self.R_d @ (self.rotationmatrix(q_r[2,0]).T @ q_rdot[i-1])
+    def time_integrate_steps(self, Gamma_list, N, dt=1E-2):
+        self.N = N
+        self.dt = dt
+        self.t_list = np.arange(0, self.N*self.dt, self.dt)
+        self.q_r_list = np.zeros((self.N,3,1))
+        self.q_rdot_list = np.zeros((self.N,3,1))
+        self.q_r_list[0] = self.q_r
+        self.q_rdot_list[0] = self.q_rdot
+        for i in range(1,N):
+            self.time_integrate(Gamma_list[i-1], dt=dt)
+            self.q_r_list[i] = self.q_r
+            self.q_rdot_list[i] = self.q_rdot
+        
+    def get_odometry_vel(self, angle, q_rdot):
+        return self.R_d @ (self.rotationmatrix(angle).T @ q_rdot)
     
     def simulate_odometry(self, q_r, q_rdot, dt=1E-2):
-        self.q_d = self.q_d + self.get_odometry_vel(q_r, q_rdot) * dt
+        self.q_d = self.q_d + self.get_odometry_vel(q_r[2,0], q_rdot) * dt
+    
+    def simulate_odometry_from_list(self):
+        self.q_d_list = np.zeros((self.N,3,1))
+        for i in range(1, self.N):
+            self.q_d_list[i] = self.q_d_list[i-1] + self.get_odometry_vel(self.q_r_list[i-1,2,0], self.q_rdot_list[i-1]) * self.dt
     
     def predict_position_from_odometry(self, t_ext, q_d_funct,x0 = np.zeros((3,1))):
         N = t_ext.shape[0]
@@ -238,7 +257,7 @@ if __name__ == "__main__":
     q_r[0] = q_r0
     q_rdot[0] = q_rdot0
     
-    for i in range(N):
+    for i in range(1,N):
         robot.time_integrate(Gamma, dt=dt)
         q_r[i] = robot.q_r
         q_rdot[i] = robot.q_rdot
