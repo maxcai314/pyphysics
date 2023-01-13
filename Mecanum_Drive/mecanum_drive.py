@@ -38,11 +38,11 @@ class Robot():
         self.M_r = np.diag([self.m,self.m,self.I_z])
         self.M_w = np.diag(self.I_w)
         
-        if self.S_geometric==None:
+        if self.S_geometric is None:
             self.S_geometric = np.array([self.L, self.L, -self.L, -self.L])
-        if self.d_geometric==None:
+        if self.d_geometric is None:
             self.d_geometric = np.array([self.l, -self.l, self.l, -self.l])
-        if self.alpha==None:
+        if self.alpha is None:
             self.alpha = [0.25 * np.pi, -0.25 * np.pi, -0.25 * np.pi, 0.25 * np.pi]
         
         if self.q_r is None:
