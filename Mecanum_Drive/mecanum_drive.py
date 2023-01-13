@@ -175,7 +175,7 @@ class Robot():
         return output
    
     def plot_evolution(self, t, q_r, q_rdot, fig=None, block=False, show=True):
-        if fig==None:
+        if fig is None:
             fig, (ax1, ax2) = plt.subplots(2)
         elif len(fig.axes) < 2:
             if len(fig.axes) > 0:
@@ -203,7 +203,7 @@ class Robot():
             plt.show(block=block)
     
     def plot_trajectory(self, q_r, fig=None, block=False, drawrobot=True, show=True, linecolor='b', label = None):
-        if fig==None:
+        if fig is None:
             fig = plt.figure()
         else:
             plt.figure(fig.number)
@@ -215,7 +215,7 @@ class Robot():
         
         plt.xlim(-1.2*maxd,1.2 * maxd)
         plt.ylim(-1.2*maxd,1.2 * maxd)
-        if label==None:
+        if label is None:
             plt.plot(xPos,yPos,linecolor)
         else:
             plt.plot(xPos,yPos,linecolor,label=label)
