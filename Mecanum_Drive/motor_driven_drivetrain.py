@@ -16,7 +16,7 @@ class Drivetrain(Robot):
     def __init__(self, voltage = 12, startPos = None, startVel = None):
         super().__init__(m=10.,I_z=0.15,I_w=[0.005,0.005,0.005,0.005], friction=0.059, r=0.048, q_r=startPos, q_rdot=startVel)
         
-        self.voltage = 12
+        self.voltage = voltage
         
         self.front_left = Motor(.005, 1.6, 0.36, 0.37)
         self.front_right = Motor(.005, 1.6, 0.36, 0.37)
