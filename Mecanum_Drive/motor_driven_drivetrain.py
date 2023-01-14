@@ -11,68 +11,92 @@ import matplotlib.pyplot as plt
 from mecanum_drive import Robot
 from motor_simulation import Motor
 
-robot = Robot(m=10.,I_z=0.15,I_w=[0.005,0.005,0.005,0.005], friction=0.059, r=0.048)
-
-front_left = Motor(.005, 1.6, 0.36, 0.37)
-front_right = Motor(.005, 1.6, 0.36, 0.37)
-back_left = Motor(.005, 1.6, 0.36, 0.37)
-back_right = Motor(.005, 1.6, 0.36, 0.37)
-
-q_r0 = np.array([[0],[0],[0]])
-q_rdot0 = np.array([[1],[1],[2]])
-
-N = int(1E3)
-dt = 1E-2
-t = np.arange(0, N*dt, dt)
-
-Gamma = np.zeros((4,1))
-
-q_r = np.zeros((N,3,1))
-q_rdot = np.zeros((N,3,1))
-q_r[0] = q_r0
-q_rdot[0] = q_rdot0
-
-vFrontLeft = 12
-vFrontRight = 12
-vBackLeft = 12
-vBackRight = 12
-
-for i in range(1,N):
-    if i>500:
-        vFrontLeft = -12
-        vFrontRight = -12
-        vBackLeft = -12
-        vBackRight = -12
-    if i>750:
-        vFrontLeft = 12
-        vFrontRight = -12
-        vBackLeft = -12
-        vBackRight = 12
+class Drivetrain(Robot):
+    
+    def __init__(self, voltage = 12, startPos = None, startVel = None):
+        super().__init__(m=10.,I_z=0.15,I_w=[0.005,0.005,0.005,0.005], friction=0.059, r=0.048, q_r=startPos, q_rdot=startVel)
         
+        self.voltage = 12
         
-    wheel_vel = robot.get_wheel_vel_current()
+        self.front_left = Motor(.005, 1.6, 0.36, 0.37)
+        self.front_right = Motor(.005, 1.6, 0.36, 0.37)
+        self.back_left = Motor(.005, 1.6, 0.36, 0.37)
+        self.back_right = Motor(.005, 1.6, 0.36, 0.37)
+        
+        self.front_left_power = 0
+        self.front_right_power = 0
+        self.back_left_power = 0
+        self.back_right_power = 0
     
-    front_left.angular_vel = wheel_vel[0,0]
-    front_right.angular_vel = wheel_vel[1,0]
-    back_left.angular_vel = wheel_vel[2,0]
-    back_right.angular_vel = wheel_vel[3,0]
+    def set_powers(self, front_left_power, front_right_power, back_left_power, back_right_power):
+        self.front_left_power = front_left_power
+        self.front_right_power = front_right_power
+        self.back_left_power = back_left_power
+        self.back_right_power = back_right_power
+        
+    def time_integrate(self, time_step):
+        self.front_left.time_integrate_(self.voltage * self.front_left_power, time_step, 0)
+        self.front_right.time_integrate_(self.voltage * self.front_right_power, time_step, 0)
+        self.back_left.time_integrate_(self.voltage * self.back_left_power, time_step, 0)
+        self.back_right.time_integrate_(self.voltage * self.back_right_power, time_step, 0)
+        
+        Torque = np.zeros((4,1))
+        
+        Torque[0,0] = self.front_left.torque
+        Torque[1,0] = self.front_right.torque
+        Torque[2,0] = self.back_left.torque
+        Torque[3,0] = self.back_right.torque
+        
+        super().time_integrate(Torque, time_step)
     
-    front_left.time_integrate(vFrontLeft, dt)
-    front_right.time_integrate(vFrontRight, dt)
-    back_left.time_integrate(vBackLeft, dt)
-    back_right.time_integrate(vBackRight, dt)
-
-    Gamma[0,0] = front_left.torque
-    Gamma[1,0] = front_right.torque
-    Gamma[2,0] = back_left.torque
-    Gamma[3,0] = back_right.torque
+    @property
+    def position(self):
+        return self.q_r
     
-    robot.time_integrate(Gamma, dt=dt)
-    q_r[i] = robot.q_r
-    q_rdot[i] = robot.q_rdot
+    @property
+    def velocity(self):
+        return self.q_rdot
 
-fig1, axis = plt.subplots(2)
-fig2=plt.figure()
-
-robot.plot_evolution(t, q_r, q_rdot, fig=fig1)
-robot.plot_trajectory(q_r, fig=fig2)
+if __name__=="__main__":
+    startPos = np.array([[0],[0],[0]]) # x, y, angle
+    startVel = np.array([[0],[0],[0]]) # xVel, yVel, angleVel
+    
+    robot = Drivetrain(startPos=startPos, startVel=startVel)
+    
+    
+    N = int(1E4)
+    time_step = 1E-3
+    t = np.arange(0, N*time_step, time_step)
+    
+    robot_position = np.zeros((N,3,1))
+    robot_velocity = np.zeros((N,3,1))
+    
+    robot_position[0] = startPos
+    robot_velocity[0] = startVel
+    
+    for i in range(1,5000):
+        robot.set_powers(1, 1, 1, 1)
+        robot.time_integrate(time_step)
+        
+        robot_position[i] = robot.position
+        robot_velocity[i] = robot.velocity
+        
+    for i in range(5001, 7500):
+        robot.set_powers(-1, -1, -1, -1)
+        robot.time_integrate(time_step)
+        
+        robot_position[i] = robot.position
+        robot_velocity[i] = robot.velocity
+        
+    for i in range(7501, N):
+        robot.set_powers(1, -1, -1, 1)
+        robot.time_integrate(time_step)
+        
+        robot_position[i] = robot.position
+        robot_velocity[i] = robot.velocity
+    
+    fig1, axis = plt.subplots(2)
+    fig2=plt.figure()
+    
+    robot.plot_evolution(t, robot_position, robot_velocity, fig=fig1)
+    robot.plot_trajectory(robot_position, fig=fig2)
