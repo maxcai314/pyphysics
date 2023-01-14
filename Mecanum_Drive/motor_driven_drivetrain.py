@@ -58,6 +58,9 @@ class Drivetrain(Robot):
         return self.q_rdot
 
 if __name__=="__main__":
+    
+    # simple test case of the Drivetrain class
+    
     startPos = np.array([[0],[0],[0]]) # x, y, angle
     startVel = np.array([[0],[0],[0]]) # xVel, yVel, angleVel
     
@@ -71,24 +74,21 @@ if __name__=="__main__":
     robot_position = np.zeros((N,3,1))
     robot_velocity = np.zeros((N,3,1))
     
-    robot_position[0] = startPos
-    robot_velocity[0] = startVel
-    
-    for i in range(1,5000):
+    for i in range(0,5000):
         robot.set_powers(1, 1, 1, 1)
         robot.time_integrate(time_step)
         
         robot_position[i] = robot.position
         robot_velocity[i] = robot.velocity
         
-    for i in range(5001, 7500):
+    for i in range(5000, 7500):
         robot.set_powers(-1, -1, -1, -1)
         robot.time_integrate(time_step)
         
         robot_position[i] = robot.position
         robot_velocity[i] = robot.velocity
         
-    for i in range(7501, N):
+    for i in range(7500, N):
         robot.set_powers(1, -1, -1, 1)
         robot.time_integrate(time_step)
         
