@@ -28,12 +28,42 @@ class Drivetrain(Robot):
         self.back_left_power = 0
         self.back_right_power = 0
     
+    def range_function(self, input):
+        # keeps the number, unless its magnitude is greater than 1, where it will be rounded to the maximum range of [-1, 1]
+        if input > 1:
+            return 1
+        elif input < -1:
+            return -1
+        else:
+            return input
+    
     def set_powers(self, front_left_power, front_right_power, back_left_power, back_right_power):
         self.front_left_power = front_left_power
         self.front_right_power = front_right_power
         self.back_left_power = back_left_power
         self.back_right_power = back_right_power
+    
+    def set_powers_with_controller(self, forwardMov, strafeMov, turnMov, scaleDown = True):
+        front_left_power = forwardMov + strafeMov - turnMov
+        front_right_power = forwardMov - strafeMov + turnMov
+        back_left_power = forwardMov - strafeMov - turnMov
+        back_right_power = forwardMov + strafeMov + turnMov
         
+        maximumPower = np.max(np.abs([front_left_power, front_right_power, back_left_power, back_right_power]))
+        if maximumPower > 1:
+            if scaleDown:
+                front_left_power /= maximumPower
+                front_right_power /= maximumPower
+                back_left_power /= maximumPower
+                back_right_power /= maximumPower
+            else:
+                front_left_power = self.range_function(front_left_power)
+                front_right_power = self.range_function(front_right_power)
+                back_left_power = self.range_function(back_left_power)
+                back_right_power = self.range_function(back_right_power)
+        
+        self.set_powers(front_left_power, front_right_power, back_left_power, back_right_power)
+    
     def time_integrate(self, time_step):
         self.front_left.time_integrate_(self.voltage * self.front_left_power, time_step, 0)
         self.front_right.time_integrate_(self.voltage * self.front_right_power, time_step, 0)
