@@ -39,10 +39,23 @@ vBackRight = 12
 
 for i in range(1,N):
     if i>500:
-        vFrontLeft = 0
-        vFrontRight = 0
-        vBackLeft = 0
-        vBackRight = 0
+        vFrontLeft = -12
+        vFrontRight = -12
+        vBackLeft = -12
+        vBackRight = -12
+    if i>750:
+        vFrontLeft = 12
+        vFrontRight = -12
+        vBackLeft = -12
+        vBackRight = 12
+        
+        
+    wheel_vel = robot.get_wheel_vel_current()
+    
+    front_left.angular_vel = wheel_vel[0,0]
+    front_right.angular_vel = wheel_vel[1,0]
+    back_left.angular_vel = wheel_vel[2,0]
+    back_right.angular_vel = wheel_vel[3,0]
     
     front_left.time_integrate(vFrontLeft, dt)
     front_right.time_integrate(vFrontRight, dt)
