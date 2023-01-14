@@ -17,7 +17,7 @@ class Motor:
         self.motor_constant = motor_constant
         self.viscous_friction = viscous_friction
 
-        self.torque = 0
+       #self.torque = 0
         self.angular_vel = 0
         self.current = 0
 
@@ -62,15 +62,18 @@ class Motor:
 
     def time_integrate_(self, voltage, time_step, external_force):
         voltage += self.armature_resistance / self.motor_constant * external_force # backdrive
-        torque_dot = self.torque_dot(voltage, (voltage - self.last_voltage) / time_step)
+        #torque_dot = self.torque_dot(voltage, (voltage - self.last_voltage) / time_step)
         angular_vel_dot = self.angular_vel_dot(voltage)
         current_dot = self.current_dot(voltage, time_step)
 
-        self.torque += torque_dot * time_step
+        #self.torque += torque_dot * time_step
         self.angular_vel += angular_vel_dot * time_step
         self.current += current_dot * time_step
 
         self.last_voltage = voltage
+
+    def torque(self, voltage, velocity):
+        return (voltage - self.motor_constant * velocity) / self.armature_resistance
 
     def time_integrate(self, voltage, time, time_step=.01, external_force=0):
         time = max(time, time_step)

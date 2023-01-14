@@ -14,19 +14,18 @@ from motor_simulation import Motor
 class Drivetrain(Robot):
     
     def __init__(self, voltage = 12, startPos = None, startVel = None):
-        super().__init__(m=10.,I_z=0.15,I_w=[0.005,0.005,0.005,0.005], friction=0.059, r=0.048, q_r=startPos, q_rdot=startVel)
+        super().__init__(m=10.,I_z=0.15,I_w=np.ones(4) * .07, friction=0.0, r=0.048, q_r=startPos, q_rdot=startVel)
         
         self.voltage = voltage
-        
-        self.front_left = Motor(.005, 1.6, 0.36, 0.37)
-        self.front_right = Motor(.005, 1.6, 0.36, 0.37)
-        self.back_left = Motor(.005, 1.6, 0.36, 0.37)
-        self.back_right = Motor(.005, 1.6, 0.36, 0.37)
+    
         
         self.front_left_power = 0
         self.front_right_power = 0
         self.back_left_power = 0
         self.back_right_power = 0
+        
+        self.armature_resistance = 1.6
+        self.motor_constant  = .22
     
     def range_function(self, input):
         # keeps the number, unless its magnitude is greater than 1, where it will be rounded to the maximum range of [-1, 1]
@@ -64,20 +63,15 @@ class Drivetrain(Robot):
         
         self.set_powers(front_left_power, front_right_power, back_left_power, back_right_power)
     
+    def torque(self):
+        Rotation = self.rotationmatrix(self.q_r[2,0])
+        ea = self.voltage * np.array([[self.front_left_power], [self.front_right_power], [self.back_left_power], [self.back_right_power]])
+        eb = self.R @ Rotation.T @ self.q_rdot * self.motor_constant
+        return (ea - eb) / self.armature_resistance
+    
     def time_integrate(self, time_step):
-        self.front_left.time_integrate_(self.voltage * self.front_left_power, time_step, 0)
-        self.front_right.time_integrate_(self.voltage * self.front_right_power, time_step, 0)
-        self.back_left.time_integrate_(self.voltage * self.back_left_power, time_step, 0)
-        self.back_right.time_integrate_(self.voltage * self.back_right_power, time_step, 0)
-        
-        Torque = np.zeros((4,1))
-        
-        Torque[0,0] = self.front_left.torque
-        Torque[1,0] = self.front_right.torque
-        Torque[2,0] = self.back_left.torque
-        Torque[3,0] = self.back_right.torque
-        
-        super().time_integrate(Torque, time_step)
+
+        super().time_integrate(self.torque(), time_step)
     
     @property
     def position(self):

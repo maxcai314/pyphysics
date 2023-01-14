@@ -203,7 +203,7 @@ class Robot():
         ax2.plot(t, q_rdot[:,0,0],'b', label='X velocity')
         ax2.plot(t, q_rdot[:,1,0],'r', label='Y velocity')
         ax2.plot(t, q_rdot[:,2,0],'g', label='Psi velocity')
-        ax2.legend()
+        #ax2.legend()
         ax2.set_xlabel('t')
         if show:
             plt.show(block=block)
