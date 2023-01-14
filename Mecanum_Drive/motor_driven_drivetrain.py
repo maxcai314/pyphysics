@@ -66,15 +66,16 @@ if __name__=="__main__":
     
     robot = Drivetrain(startPos=startPos, startVel=startVel)
     
-    
     N = int(1E4)
     time_step = 1E-3
     t = np.arange(0, N*time_step, time_step)
     
     robot_position = np.zeros((N,3,1))
     robot_velocity = np.zeros((N,3,1))
+    robot_position[0] = startPos
+    robot_velocity[0] = startVel
     
-    for i in range(0,5000):
+    for i in range(1,5000):
         robot.set_powers(1, 1, 1, 1)
         robot.time_integrate(time_step)
         
