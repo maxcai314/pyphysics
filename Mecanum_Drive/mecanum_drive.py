@@ -108,7 +108,13 @@ class Robot():
             self.time_integrate(Gamma_list[i-1], dt=dt)
             self.q_r_list[i] = self.q_r
             self.q_rdot_list[i] = self.q_rdot
-        
+    
+    def get_wheel_vel(self, angle, q_rdot):
+        return self.R @ (self.rotationmatrix(angle).T @ q_rdot)
+    
+    def get_wheel_vel_current(self):
+        return self.get_wheel_vel(self.q_r[2,0], self.q_rdot)
+    
     def get_odometry_vel(self, angle, q_rdot):
         return self.R_d @ (self.rotationmatrix(angle).T @ q_rdot)
     
