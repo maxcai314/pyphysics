@@ -38,6 +38,11 @@ class Drivetrain(Robot):
             return input
     
     def set_powers(self, front_left_power, front_right_power, back_left_power, back_right_power):
+        front_left_power = self.range_function(front_left_power)
+        front_right_power = self.range_function(front_right_power)
+        back_left_power = self.range_function(back_left_power)
+        back_right_power = self.range_function(back_right_power)
+        
         self.front_left_power = front_left_power
         self.front_right_power = front_right_power
         self.back_left_power = back_left_power
@@ -56,11 +61,6 @@ class Drivetrain(Robot):
                 front_right_power /= maximumPower
                 back_left_power /= maximumPower
                 back_right_power /= maximumPower
-            else:
-                front_left_power = self.range_function(front_left_power)
-                front_right_power = self.range_function(front_right_power)
-                back_left_power = self.range_function(back_left_power)
-                back_right_power = self.range_function(back_right_power)
         
         self.set_powers(front_left_power, front_right_power, back_left_power, back_right_power)
     
