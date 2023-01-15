@@ -36,7 +36,7 @@ frPower = interpolate.interp1d(times_real, fr, kind="cubic", fill_value="extrapo
 blPower = interpolate.interp1d(times_real, bl, kind="cubic", fill_value="extrapolate")
 brPower = interpolate.interp1d(times_real, br, kind="cubic", fill_value="extrapolate")
 
-x_vel =interpolate.interp1d(times_real[0::5], x_vel_real[0::5], kind="linear", fill_value="extrapolate")
+x_vel =interpolate.interp1d(times_real, x_vel_real, kind="linear", fill_value="extrapolate")
 y_vel =interpolate.interp1d(times_real, y_vel_real, kind="linear", fill_value="extrapolate")
 angle_vel =interpolate.interp1d(times_real, angle_vel_real, kind="linear", fill_value="extrapolate")
 
@@ -45,8 +45,8 @@ startVel = np.array([[0],[0],[0]]) # xVel, yVel, angleVel
 
 robot = Drivetrain(voltage=12, startPos=startPos, startVel=startVel)
 
-N = int(14E3)
-time_step = 1E-3
+N = int(14E4)
+time_step = 1E-4
 t = np.arange(0, N*time_step, time_step)
 
 x_accel_real = np.zeros((N,1))
@@ -85,13 +85,13 @@ fig2 = plt.figure()
 ax1 = fig1.axes[0]
 ax2 = fig1.axes[1]
 
-ax1.plot(times_real, x_pos_real,'c', label='robot X')
-ax1.plot(times_real, y_pos_real,'y', label='robot Y')
-# ax1.plot(times_real, angle_real,'m', label='robot Psi')
+# ax1.plot(times_real, x_pos_real,'c', label='robot X')
+# ax1.plot(times_real, y_pos_real,'y', label='robot Y')
+ax1.plot(times_real, angle_real,'m', label='robot Psi')
 
-ax2.plot(times_real, x_vel_real,'c', label='robot X vel')
-ax2.plot(times_real, y_vel_real,'y', label='robot Y vel')
-# ax2.plot(times_real, angle_vel_real,'m', label='robot Psi vel')
+# ax2.plot(times_real, x_vel_real,'c', label='robot X vel')
+# ax2.plot(times_real, y_vel_real,'y', label='robot Y vel')
+ax2.plot(times_real, angle_vel_real,'m', label='robot Psi vel')
 
 robot.plot_evolution(t, robot_position, robot_velocity, fig=fig1, show=True)
 # robot.plot_evolution(t, robot_position, robot_velocity, fig=fig1, show=True)
@@ -100,12 +100,12 @@ robot.plot_trajectory(robot_position, fig=fig2)
 plt.figure()
 
 plt.plot([0, np.max(t)],[0,0],'k')
-plt.plot(t, x_accel_real,'c', label='X accel real')
-plt.plot(t, y_accel_real,'y', label='Y accel real')
-# plt.plot(t, angle_accel_real,'m', label='Psi accel real')
-plt.plot(t, robot_acceleration[:,0,0],'b', label='X accel simulate')
-plt.plot(t, robot_acceleration[:,1,0],'r', label='Y accel simulate')
-# plt.plot(t, robot_acceleration[:,2,0],'g', label='Psi accel simulate')
+# plt.plot(t, x_accel_real,'c', label='X accel real')
+# plt.plot(t, y_accel_real,'y', label='Y accel real')
+plt.plot(t, angle_accel_real,'m', label='Psi accel real')
+# plt.plot(t, robot_acceleration[:,0,0],'b', label='X accel simulate')
+# plt.plot(t, robot_acceleration[:,1,0],'r', label='Y accel simulate')
+plt.plot(t, robot_acceleration[:,2,0],'g', label='Psi accel simulate')
 
 plt.legend()
 plt.title("Acceleration")

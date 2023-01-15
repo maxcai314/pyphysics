@@ -197,14 +197,14 @@ class Robot():
         ax1.plot([0, np.max(t)],[0,0],'k')
         ax1.plot(t, q_r[:,0,0],'b', label='X position')
         ax1.plot(t, q_r[:,1,0],'r', label='Y position')
-        # ax1.plot(t, q_r[:,2,0],'g', label='Psi position')
+        ax1.plot(t, q_r[:,2,0],'g', label='Psi position')
         ax1.legend()
         ax1.title.set_text('Mechanum Wheeled Robot')
         
         ax2.plot([0, np.max(t)],[0,0],'k')
         ax2.plot(t, q_rdot[:,0,0],'b', label='X velocity')
         ax2.plot(t, q_rdot[:,1,0],'r', label='Y velocity')
-        # ax2.plot(t, q_rdot[:,2,0],'g', label='Psi velocity')
+        ax2.plot(t, q_rdot[:,2,0],'g', label='Psi velocity')
         #ax2.legend()
         ax2.set_xlabel('t')
         if show:
