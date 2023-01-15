@@ -12,101 +12,121 @@ from motor_driven_drivetrain import Drivetrain
 import pandas as pd
 from scipy import interpolate
 
+df = pd.read_csv('driving_around_log7.csv')
+df['x_position'] = df['x_position'].div(39.37)  # convert from inch to meter
+df['y_position'] = df['y_position'].div(39.37)
+df['x_velocity'] = df['x_velocity'].div(39.37)
+df['y_velocity'] = df['y_velocity'].div(39.37)
+
+df_resampled = pd.DataFrame()
+T = .1
+df_resampled['time'] = np.arange(0, df['time'].max(), step=T)
+
+for c in ['fl', 'fr', 'bl', 'br']:
+    df_resampled[c] = interpolate.interp1d(df['time'], df[c], kind="previous", fill_value="extrapolate")(
+        df_resampled['time'])
+    df_resampled[c][0] = df_resampled[c][1]
+
+for c in ['battery_voltage', 'x_position', 'y_position', 'angle', 'x_velocity', 'y_velocity', 'angular_velocity']:
+    df_resampled[c] = interpolate.interp1d(df['time'], df[c], kind='cubic', fill_value="extrapolate")(
+        df_resampled['time'])
+
+df = df_resampled
+
+df['x_acceleration'] = df['x_velocity'].diff().fillna(0) / T
+df['y_acceleration'] = df['y_velocity'].diff().fillna(0) / T
+df['angular_acceleration'] = df['angular_velocity'].diff().fillna(0) / T
+
+startPos = np.array([0, 0, 0])  # x, y, angle
+startVel = np.array([0, 0, 0])  # xVel, yVel, angleVel
 
 
-df = pd.read_csv('driving_around_log7.csv').to_dict('records')
-x_pos_real = np.array([d['x_position'] for d in df]) / 39.37 # convert from inch to meter
-y_pos_real = np.array([d['y_position'] for d in df]) / 39.37
-angle_real = np.array([d['angle'] for d in df])
-x_vel_real = np.array([d['x_velocity'] for d in df]) / 39.37
-y_vel_real = np.array([d['y_velocity'] for d in df]) / 39.37
-angle_vel_real = np.array([d['angular_velocity'] for d in df])
-fl = np.array([d['fl'] for d in df])
-fr = np.array([d['fr'] for d in df])
-bl = np.array([d['bl'] for d in df])
-br = np.array([d['br'] for d in df])
+def simulate(args, graph_velocity=False, graph_position=False):
+    robot = Drivetrain(args, startPos=startPos.reshape((-1, 1)), startVel=startVel.reshape((-1, 1)))
 
-voltage_real = [d['battery_voltage'] for d in df]
-times_real = np.array([d['time'] for d in df])
+    robot_position = np.zeros((len(df), 3))
+    robot_velocity = np.zeros((len(df), 3))
+    robot_acceleration = np.zeros((len(df), 3))
+    robot_position[0] = startPos
+    robot_velocity[0] = startVel
 
-voltage_function = interpolate.interp1d(times_real, voltage_real, kind="cubic", fill_value="extrapolate")
+    for i in range(len(df)):
+        row = df.iloc[i]
+        robot.voltage = row['battery_voltage']
+        robot.set_powers(row['fl'], row['fr'], row['bl'], row['br'])
+        robot.time_integrate(T)
 
-flPower = interpolate.interp1d(times_real, fl, kind="cubic", fill_value="extrapolate")
-frPower = interpolate.interp1d(times_real, fr, kind="cubic", fill_value="extrapolate")
-blPower = interpolate.interp1d(times_real, bl, kind="cubic", fill_value="extrapolate")
-brPower = interpolate.interp1d(times_real, br, kind="cubic", fill_value="extrapolate")
+        robot_position[i] = robot.position.reshape(-1)
+        robot_velocity[i] = robot.velocity.reshape(-1)
+        robot_acceleration[i] = robot.acceleration.reshape(-1)
 
-x_vel =interpolate.interp1d(times_real, x_vel_real, kind="linear", fill_value="extrapolate")
-y_vel =interpolate.interp1d(times_real, y_vel_real, kind="linear", fill_value="extrapolate")
-angle_vel =interpolate.interp1d(times_real, angle_vel_real, kind="linear", fill_value="extrapolate")
+    if graph_velocity:
+        plt.figure()
+        plt.plot(df['time'], df['angular_velocity'], label='real angular vel')
+        plt.plot(df['time'], robot_velocity[:, 2], label='predicted angular vel')
 
-startPos = np.array([[0],[0],[0]]) # x, y, angle
-startVel = np.array([[0],[0],[0]]) # xVel, yVel, angleVel
+        plt.plot(df['time'], df['y_velocity'], 'm', label='real y vel')
+        plt.plot(df['time'], robot_velocity[:, 1], label='predicted y vel')
 
-robot = Drivetrain(voltage=12, startPos=startPos, startVel=startVel)
+        plt.plot(df['time'], df['x_velocity'], 'm', label='real x vel')
+        plt.plot(df['time'], robot_velocity[:, 0], label='predicted x vel')
 
-N = int(14E4)
-time_step = 1E-4
-t = np.arange(0, N*time_step, time_step)
+        plt.title("velocity")
+        plt.legend()
+        plt.show()
 
-x_accel_real = np.zeros((N,1))
-y_accel_real = np.zeros((N,1))
-angle_accel_real = np.zeros((N,1))
-derivative_step = 0.1
-for i in range(N):
-    currentTime = t[i]
-    
-    x_accel_real[i] = (x_vel(currentTime + derivative_step) - x_vel(currentTime))/derivative_step
-    y_accel_real[i] = (y_vel(currentTime + derivative_step) - y_vel(currentTime))/derivative_step
-    angle_accel_real[i] = (angle_vel(currentTime + derivative_step) - angle_vel(currentTime))/derivative_step
+    if graph_position:
+        plt.figure()
+        # plt.plot(df['time'], df['angle'], label='real angle')
+        # plt.plot(df['time'], robot_position[:, 2], label='predicted angle')
+        #
+        # plt.plot(df['time'], df['x_position'], 'm', label='real y pos')
+        # plt.plot(df['time'], robot_position[:, 1], label='predicted y pos')
+
+        plt.plot(df['time'], df['y_position'], 'm', label='real x pos')
+        plt.plot(df['time'], robot_position[:, 0], label='predicted x pos')
+
+        plt.title("position")
+        plt.legend()
+        plt.show()
+    return np.sum(np.square((robot_velocity[:, 2] - df['angular_velocity'])))
+
+STEP = .0001
+def grad(a, b, c, d):
+    wrt_a = (simulate([a + STEP, b, c, d]) - simulate([a - STEP, b, c, d])) / 2 * STEP
+    wrt_b = (simulate([a, b + STEP, c, d]) - simulate([a, b - STEP, c, d])) / 2 * STEP
+    wrt_c = (simulate([a, b, c + STEP, d]) - simulate([a, b, c - STEP, d])) / 2 * STEP
+    wrt_d = (simulate([a, b, c, d + STEP]) - simulate([a, b, c, d - STEP])) / 2 * STEP
+
+    return np.array([wrt_a, wrt_b, wrt_c, 0])
 
 
-robot_position = np.zeros((N,3,1))
-robot_velocity = np.zeros((N,3,1))
-robot_acceleration = np.zeros((N,3,1))
-robot_position[0] = startPos
-robot_velocity[0] = startVel
+args = np.array([9.99995927, 1.5, 0.1, 0.])
+for i in range(1000):
+    g = grad(*args)
 
-for i in range(N):
-    currentTime = t[i]
-    robot.voltage = voltage_function(currentTime)
-    robot.set_powers(flPower(currentTime),frPower(currentTime),blPower(currentTime),brPower(currentTime))
-    robot.time_integrate(time_step)
-    
-    robot_position[i] = robot.position
-    robot_velocity[i] = robot.velocity
-    robot_acceleration[i] = robot.acceleration
+    print(g, repr(args), simulate(args, graph_velocity=True))
+    args -= g
 
-robot_position[:,2,0] = ((robot_position[:,2,0]+np.pi)%(2*np.pi)) - np.pi # angle wrap
+"""
+robot_position[:, 2] = ((robot_position[:, 2] + np.pi) % (2 * np.pi)) - np.pi  # angle wrap
 
-fig1, axis = plt.subplots(2)
-fig2 = plt.figure()
 
-ax1 = fig1.axes[0]
-ax2 = fig1.axes[1]
-
-# ax1.plot(times_real, x_pos_real,'c', label='robot X')
-# ax1.plot(times_real, y_pos_real,'y', label='robot Y')
-ax1.plot(times_real, angle_real,'m', label='robot Psi')
-
-# ax2.plot(times_real, x_vel_real,'c', label='robot X vel')
-# ax2.plot(times_real, y_vel_real,'y', label='robot Y vel')
-ax2.plot(times_real, angle_vel_real,'m', label='robot Psi vel')
-
-robot.plot_evolution(t, robot_position, robot_velocity, fig=fig1, show=True)
-# robot.plot_evolution(t, robot_position, robot_velocity, fig=fig1, show=True)
-robot.plot_trajectory(robot_position, fig=fig2)
-
-plt.figure()
-
-plt.plot([0, np.max(t)],[0,0],'k')
-# plt.plot(t, x_accel_real,'c', label='X accel real')
-# plt.plot(t, y_accel_real,'y', label='Y accel real')
-plt.plot(t, angle_accel_real,'m', label='Psi accel real')
-# plt.plot(t, robot_acceleration[:,0,0],'b', label='X accel simulate')
-# plt.plot(t, robot_acceleration[:,1,0],'r', label='Y accel simulate')
-plt.plot(t, robot_acceleration[:,2,0],'g', label='Psi accel simulate')
+plt.plot(df['time'], df['angle'], 'm', label='robot Psi')
+plt.plot(df['time'], robot_position[:, 2], label='predicted Psi')
 
 plt.legend()
-plt.title("Acceleration")
+plt.figure()
+plt.plot(df['time'], df['angular_velocity'], label='real angular vel')
+plt.plot(df['time'], robot_velocity[:, 2],  label='predicted angular vel')
+
+plt.plot(df['time'], df['y_velocity'], 'm', label='real y vel')
+plt.plot(df['time'], robot_velocity[:, 1],  label='predicted y vel')
+
+plt.plot(df['time'], df['x_velocity'], 'm', label='real x vel')
+plt.plot(df['time'], robot_velocity[:, 0], label='predicted x vel')
+
+plt.title("velocity")
+plt.legend()
 plt.show()
+"""

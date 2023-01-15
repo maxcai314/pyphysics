@@ -12,8 +12,9 @@ from mecanum_drive import Robot
 
 class Drivetrain(Robot):
     
-    def __init__(self, voltage = 12, startPos = None, startVel = None):
-        super().__init__(L=0.115,l=0.1325,m=10.,I_z=1.5,I_w=np.ones(4) * .025, friction=0.0, r=0.048, q_r=startPos, q_rdot=startVel)
+    def __init__(self, args, voltage = 12, startPos = None, startVel = None):
+        [m, I_z, I_w, friction] = args
+        super().__init__(L=0.115,l=0.1325,m=m,I_z=I_z,I_w=np.ones(4) * I_w, friction=friction, r=0.048, q_r=startPos, q_rdot=startVel)
         
         self.voltage = voltage
     
