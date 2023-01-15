@@ -36,6 +36,9 @@ frPower = interpolate.interp1d(times_real, fr, kind="nearest", fill_value="extra
 blPower = interpolate.interp1d(times_real, bl, kind="nearest", fill_value="extrapolate")
 brPower = interpolate.interp1d(times_real, br, kind="nearest", fill_value="extrapolate")
 
+x_vel =interpolate.interp1d(times_real[0::5], x_vel_real[0::5], kind="linear", fill_value="extrapolate")
+y_vel =interpolate.interp1d(times_real, y_vel_real, kind="linear", fill_value="extrapolate")
+angle_vel =interpolate.interp1d(times_real, angle_vel_real, kind="linear", fill_value="extrapolate")
 
 startPos = np.array([[0],[0],[0]]) # x, y, angle
 startVel = np.array([[0],[0],[0]]) # xVel, yVel, angleVel
@@ -46,12 +49,25 @@ N = int(6E3)
 time_step = 1E-3
 t = np.arange(0, N*time_step, time_step)
 
+x_accel_real = np.zeros((N,1))
+y_accel_real = np.zeros((N,1))
+angle_accel_real = np.zeros((N,1))
+derivative_step = 0.1
+for i in range(N):
+    currentTime = t[i]
+    
+    x_accel_real[i] = (x_vel(currentTime + derivative_step) - x_vel(currentTime))/derivative_step
+    y_accel_real[i] = (y_vel(currentTime + derivative_step) - y_vel(currentTime))/derivative_step
+    angle_accel_real[i] = (angle_vel(currentTime + derivative_step) - angle_vel(currentTime))/derivative_step
+
+
 robot_position = np.zeros((N,3,1))
 robot_velocity = np.zeros((N,3,1))
+robot_acceleration = np.zeros((N,3,1))
 robot_position[0] = startPos
 robot_velocity[0] = startVel
 
-for i in range(1,N):
+for i in range(N):
     currentTime = t[i]
     robot.set_powers(flPower(currentTime),frPower(currentTime),blPower(currentTime),brPower(currentTime))
     robot.time_integrate(time_step)
@@ -60,10 +76,10 @@ for i in range(1,N):
     
     robot_position[i] = robot.position
     robot_velocity[i] = robot.velocity
-    
+    robot_acceleration[i] = robot.acceleration
 
 fig1, axis = plt.subplots(2)
-fig2=plt.figure()
+fig2 = plt.figure()
 
 ax1 = fig1.axes[0]
 ax2 = fig1.axes[1]
@@ -79,3 +95,16 @@ ax2.plot(times_real, angle_vel_real,'m', label='robot Psi vel')
 robot.plot_evolution(t, robot_position, robot_velocity, fig=fig1, show=True)
 # robot.plot_evolution(t, robot_position, robot_velocity, fig=fig1, show=True)
 robot.plot_trajectory(robot_position, fig=fig2)
+
+plt.figure()
+
+plt.plot([0, np.max(t)],[0,0],'k')
+plt.plot(t, robot_acceleration[:,0,0],'b', label='X accel simulate')
+#plt.plot(t, robot_acceleration[:,1,0],'r', label='Y accel simulate')
+# plt.plot(t, robot_acceleration[:,2,0],'g', label='Psi accel simulate')
+plt.plot(t, x_accel_real,'c', label='X accel real')
+# plt.plot(t, y_accel_real,'y', label='Y accel real')
+# plt.plot(t, angle_accel_real,'m', label='Psi accel real')
+plt.legend()
+plt.title("Acceleration")
+plt.show()

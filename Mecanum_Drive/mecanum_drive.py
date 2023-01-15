@@ -50,6 +50,8 @@ class Robot():
         if self.q_rdot is None:
             self.q_rdot = np.array([[0],[0],[0]])
         
+        self.q_rddot = np.array([[0],[0],[0]])
+        
         self.x_center = x_center
         self.y_center = y_center
         
@@ -91,9 +93,9 @@ class Robot():
         return q_rddot
     
     def time_integrate(self, Gamma, dt=1E-2):
-        q_rddot = self.get_aceleration(Gamma, self.q_r[2,0], self.q_rdot) #forward euler method
+        self.q_rddot = self.get_aceleration(Gamma, self.q_r[2,0], self.q_rdot) #forward euler method
         prev_q_rdot = self.q_rdot
-        self.q_rdot = self.q_rdot + q_rddot * dt
+        self.q_rdot = self.q_rdot + self.q_rddot * dt
         self.q_r = self.q_r + prev_q_rdot * dt
         
     def time_integrate_steps(self, Gamma_list, N, dt=1E-2):

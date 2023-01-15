@@ -67,6 +67,7 @@ class Drivetrain(Robot):
         Rotation = self.rotationmatrix(self.q_r[2,0])
         ea = self.voltage * np.array([[self.front_left_power], [self.front_right_power], [self.back_left_power], [self.back_right_power]])
         eb = self.R @ Rotation.T @ self.q_rdot * self.motor_constant
+    
         return (ea - eb) / self.armature_resistance
     
     def time_integrate(self, time_step):
@@ -80,7 +81,11 @@ class Drivetrain(Robot):
     @property
     def velocity(self):
         return self.q_rdot
-
+    
+    @property
+    def acceleration(self):
+        return self.q_rddot
+    
 if __name__=="__main__":
     
     # simple test case of the Drivetrain class
