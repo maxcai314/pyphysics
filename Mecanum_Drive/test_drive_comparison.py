@@ -89,7 +89,7 @@ def simulate(args, graph_velocity=False, graph_position=False):
         plt.title("position")
         plt.legend()
         plt.show()
-    return np.sum(np.square((robot_velocity[:, 2] - df['angular_velocity'])))
+    return np.sum(np.square((robot_velocity - np.array([df['x_velocity'], df['y_velocity'], df['angular_velocity']]).T)))
 
 STEP = .0001
 def grad(a, b, c, d):
@@ -98,16 +98,18 @@ def grad(a, b, c, d):
     wrt_c = (simulate([a, b, c + STEP, d]) - simulate([a, b, c - STEP, d])) / 2 * STEP
     wrt_d = (simulate([a, b, c, d + STEP]) - simulate([a, b, c, d - STEP])) / 2 * STEP
 
-    return np.array([wrt_a, wrt_b, wrt_c, 0])
+    return np.array([wrt_a, wrt_b, wrt_c, wrt_d])
 
 
-args = np.array([9.99995927, 1.5, 0.1, 0.])
+args = np.array([9.99995933, 1.49950091, 0.04702355, 0.02783458])
+simulate(args, graph_velocity=True, graph_position=True)
 for i in range(1000):
     g = grad(*args)
 
-    print(g, repr(args), simulate(args, graph_velocity=True))
+    print(g, repr(args), simulate(args))
     args -= g
 
+simulate(args, graph_velocity=True, graph_position=True)
 """
 robot_position[:, 2] = ((robot_position[:, 2] + np.pi) % (2 * np.pi)) - np.pi  # angle wrap
 
