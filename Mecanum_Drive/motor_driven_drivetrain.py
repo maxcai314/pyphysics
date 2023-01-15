@@ -9,12 +9,11 @@ Created on Thu Jan 12 18:11:23 2023
 import numpy as np
 import matplotlib.pyplot as plt
 from mecanum_drive import Robot
-from motor_simulation import Motor
 
 class Drivetrain(Robot):
     
     def __init__(self, voltage = 12, startPos = None, startVel = None):
-        super().__init__(m=10.,I_z=0.15,I_w=np.ones(4) * .07, friction=0.0, r=0.048, q_r=startPos, q_rdot=startVel)
+        super().__init__(m=10.,I_z=0.05,I_w=np.ones(4) * .019, friction=0.0, r=0.048, q_r=startPos, q_rdot=startVel)
         
         self.voltage = voltage
     
@@ -72,7 +71,7 @@ class Drivetrain(Robot):
     
     def time_integrate(self, time_step):
 
-        super().time_integrate(self.torque(), time_step)
+        super().time_integrate(self.torque(), dt=time_step)
     
     @property
     def position(self):
