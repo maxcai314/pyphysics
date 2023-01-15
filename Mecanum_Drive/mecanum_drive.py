@@ -182,7 +182,7 @@ class Robot():
         output[4] = pos + rotation @ np.array([[self.L],[self.l]])
         return output
    
-    def plot_evolution(self, t, q_r, q_rdot, fig=None, block=False, show=True):
+    def plot_evolution(self, t, q_r, q_rdot, fig=None, block=False, show=True, colors=['b','r','g'], labels=['X','Y','Psi'], legends=True):
         if fig is None:
             fig, (ax1, ax2) = plt.subplots(2)
         elif len(fig.axes) < 2:
@@ -193,20 +193,22 @@ class Robot():
         else:
             ax1 = fig.axes[0]
             ax2 = fig.axes[1]
+        ax1.title.set_text('Mecanum Wheeled Robot')
+        ax2.set_xlabel('t')
         
         ax1.plot([0, np.max(t)],[0,0],'k')
-        ax1.plot(t, q_r[:,0,0],'b', label='X position')
-        ax1.plot(t, q_r[:,1,0],'r', label='Y position')
-        ax1.plot(t, q_r[:,2,0],'g', label='Psi position')
-        ax1.legend()
-        ax1.title.set_text('Mecanum Wheeled Robot')
-        
         ax2.plot([0, np.max(t)],[0,0],'k')
-        ax2.plot(t, q_rdot[:,0,0],'b', label='X velocity')
-        ax2.plot(t, q_rdot[:,1,0],'r', label='Y velocity')
-        ax2.plot(t, q_rdot[:,2,0],'g', label='Psi velocity')
-        #ax2.legend()
-        ax2.set_xlabel('t')
+        
+        ax1.plot(t, q_r[:,0,0], colors[0], label=labels[0]+' pos')
+        ax1.plot(t, q_r[:,1,0],colors[1], label=labels[1]+' pos')
+        ax1.plot(t, q_r[:,2,0],colors[2], label=labels[2]+' pos')
+        
+        ax2.plot(t, q_rdot[:,0,0], colors[0], label=labels[0]+' vel')
+        ax2.plot(t, q_rdot[:,1,0], colors[1], label=labels[1]+' vel')
+        ax2.plot(t, q_rdot[:,2,0], colors[2], label=labels[2]+' vel')
+        if legends:
+            ax1.legend()
+            ax2.legend()
         if show:
             plt.show(block=block)
     
