@@ -12,7 +12,7 @@ from motor_driven_drivetrain import Drivetrain
 import pandas as pd
 from scipy import interpolate
 
-df = pd.read_csv('drivetrain_uniform_step.csv')
+df = pd.read_csv('driving_around_log4.csv')
 df['x_position'] = df['x_position'].div(39.37)  # convert from inch to meter
 df['y_position'] = df['y_position'].div(39.37)
 df['x_velocity'] = df['x_velocity'].div(39.37)
@@ -42,9 +42,10 @@ startVel = np.array([0, 0, 0])  # xVel, yVel, angleVel
 
 
 def simulate(args, graph_velocity=False, graph_position=False):
-    [I_z,I_w, motor_constant, ffl, ffr, bfl, bfr] = args
+    [I_z,I_w, motor_constant, ffl, ffr, bfl, bfr, fx, fy, fpsi] = args
     friction = np.array([[ffl],[ffr],[bfl],[bfr]])
-    robot = Drivetrain(motor_constant=motor_constant, I_z=I_z, I_w=I_w, friction=friction, startPos=startPos.reshape((-1, 1)), startVel=startVel.reshape((-1, 1)))
+    directional_friction = np.array([[fx],[fy],[fpsi]])
+    robot = Drivetrain(motor_constant=motor_constant, I_z=I_z, I_w=I_w, friction=friction, directional_friction=directional_friction, startPos=startPos.reshape((-1, 1)), startVel=startVel.reshape((-1, 1)))
 
     robot_position = np.zeros((len(df), 3))
     robot_velocity = np.zeros((len(df), 3))
@@ -61,7 +62,9 @@ def simulate(args, graph_velocity=False, graph_position=False):
         robot_position[i] = robot.position.reshape(-1)
         robot_velocity[i] = (robot.rotationmatrix(robot.position[2,0]).T @ robot.velocity).reshape(-1)
         robot_acceleration[i] = (robot.rotationmatrix(robot.position[2,0]).T @ robot.acceleration).reshape(-1)
-
+        
+    robot_position[:,2] = ((robot_position[:,2]+np.pi)%(2*np.pi)) - np.pi
+    
     if graph_velocity:
         plt.figure()
         plt.plot(df['time'], df['angular_velocity'], label='real angular vel')
@@ -94,25 +97,25 @@ def simulate(args, graph_velocity=False, graph_position=False):
     return np.sum(np.square((robot_velocity - np.array([df['x_velocity'], df['y_velocity'], df['angular_velocity']]).T)))
 
 STEP = .0001
-def grad(a, b, c, d, e, f, g):
-    wrt_a = (simulate([a + STEP, b, c, d, e, f, g]) - simulate([a - STEP, b, c, d, e, f, g])) / 2 * STEP
-    wrt_b = (simulate([a, b + STEP, c, d, e, f, g]) - simulate([a, b - STEP, c, d, e, f, g])) / 2 * STEP
-    wrt_c = (simulate([a, b, c + STEP, d, e, f, g]) - simulate([a, b, c - STEP, d, e, f, g])) / 2 * STEP
-    wrt_d = (simulate([a, b, c, d + STEP, e, f, g]) - simulate([a, b, c, d - STEP, e, f, g])) / 2 * STEP
-    wrt_e = (simulate([a, b, c, d, e + STEP, f, g]) - simulate([a, b, c, d, e - STEP, f, g])) / 2 * STEP
-    wrt_f = (simulate([a, b, c, d, e, f + STEP, g]) - simulate([a, b, c, d, e, f - STEP, g])) / 2 * STEP
-    wrt_g = (simulate([a, b, c, d, e, f, g + STEP]) - simulate([a, b, c, d, e, f, g - STEP])) / 2 * STEP
+def grad(args):
+    result = np.zeros(args.size)
+    for i in range(args.size):
+        arg_plus = args.copy()
+        arg_plus[i] = args[i] + STEP
+        arg_minus = args.copy()
+        arg_minus[i] = args[i] - STEP
+        
+        result[i] = (simulate(arg_plus) - simulate(arg_minus)) / (2 * STEP)
+    return result / np.linalg.norm(result) 
 
-    return np.array([wrt_a, wrt_b, wrt_c, wrt_d, wrt_e, wrt_f, wrt_g])
 
-
-args = np.array([0.99999997, 0.10362316, 0.16846595, 0.61274014, 0.60572202, 0.61270204, 0.60576011])
+args = np.array([1.99342709, 0.06464435, 0.26225076, 0.65752611, 0.6100913, 0.63821728, 1.58357671, 1.19970793, 1.00081366, 1.20220801])
 simulate(args, graph_velocity=True, graph_position=True)
-for i in range(1000):
-    g = grad(*args)
+for i in range(500):
+    g = grad(args)
 
     print(g, repr(args), simulate(args))
-    args -= g * 100
+    args -= g * .01
 
 simulate(args, graph_velocity=True, graph_position=True)
 """

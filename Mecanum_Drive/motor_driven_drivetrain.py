@@ -12,8 +12,8 @@ from mecanum_drive import Robot
 
 class Drivetrain(Robot):
     
-    def __init__(self,motor_constant=0.22,I_z=3.,I_w=[0.05,0.05,0.05,0.05],friction=0.1, voltage = 12, startPos = None, startVel = None):
-        super().__init__(L=0.115,l=0.1325,m=11.2,I_z=I_z,I_w=np.ones(4) * I_w, friction=friction, r=0.048, q_r=startPos, q_rdot=startVel)
+    def __init__(self,motor_constant=0.22,I_z=3.,I_w=[0.05,0.05,0.05,0.05],friction=0.1,directional_friction=np.array([[0],[0],[0]]), voltage = 12, startPos = None, startVel = None):
+        super().__init__(L=0.115,l=0.1325,m=11.2,I_z=I_z,I_w=np.ones(4) * I_w, friction=friction,directional_friction=directional_friction, r=0.048, q_r=startPos, q_rdot=startVel)
         
         self.voltage = voltage
     
