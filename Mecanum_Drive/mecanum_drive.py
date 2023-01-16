@@ -88,7 +88,7 @@ class Robot():
         
         self.H = self.M_r + Rotation @ self.R.T @ self.M_w @ self.R @ Rotation.T
         self.K = Rotation @ self.R.T @ self.M_w @ self.R @ Rotationdot.T
-        self.F_a = Rotation @ self.R.T @ (Gamma - q_wdot * self.friction)
+        self.F_a = Rotation @ self.R.T @ (Gamma - np.sign(q_wdot) * self.friction)
         q_rddot = np.linalg.inv(self.H) @ (self.F_a - self.K @ q_rdot)
         return q_rddot
     

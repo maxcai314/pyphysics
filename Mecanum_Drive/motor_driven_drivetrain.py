@@ -12,9 +12,8 @@ from mecanum_drive import Robot
 
 class Drivetrain(Robot):
     
-    def __init__(self, args, voltage = 12, startPos = None, startVel = None):
-        [m, I_z, I_w, friction] = args
-        super().__init__(L=0.115,l=0.1325,m=m,I_z=I_z,I_w=np.ones(4) * I_w, friction=friction, r=0.048, q_r=startPos, q_rdot=startVel)
+    def __init__(self,motor_constant=0.22,I_z=3.,I_w=[0.05,0.05,0.05,0.05],friction=0.1, voltage = 12, startPos = None, startVel = None):
+        super().__init__(L=0.115,l=0.1325,m=11.2,I_z=I_z,I_w=np.ones(4) * I_w, friction=friction, r=0.048, q_r=startPos, q_rdot=startVel)
         
         self.voltage = voltage
     
@@ -25,7 +24,7 @@ class Drivetrain(Robot):
         self.back_right_power = 0
         
         self.armature_resistance = 1.6
-        self.motor_constant  = .22
+        self.motor_constant  = motor_constant
     
     def range_function(self, input):
         # keeps the number, unless its magnitude is greater than 1, where it will be rounded to the maximum range of [-1, 1]

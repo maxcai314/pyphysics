@@ -12,7 +12,7 @@ from motor_driven_drivetrain import Drivetrain
 import pandas as pd
 from scipy import interpolate
 
-df = pd.read_csv('driving_around_log7.csv')
+df = pd.read_csv('drivetrain_uniform_step.csv')
 df['x_position'] = df['x_position'].div(39.37)  # convert from inch to meter
 df['y_position'] = df['y_position'].div(39.37)
 df['x_velocity'] = df['x_velocity'].div(39.37)
@@ -42,7 +42,9 @@ startVel = np.array([0, 0, 0])  # xVel, yVel, angleVel
 
 
 def simulate(args, graph_velocity=False, graph_position=False):
-    robot = Drivetrain(args, startPos=startPos.reshape((-1, 1)), startVel=startVel.reshape((-1, 1)))
+    [I_z,I_w, motor_constant, ffl, ffr, bfl, bfr] = args
+    friction = np.array([[ffl],[ffr],[bfl],[bfr]])
+    robot = Drivetrain(motor_constant=motor_constant, I_z=I_z, I_w=I_w, friction=friction, startPos=startPos.reshape((-1, 1)), startVel=startVel.reshape((-1, 1)))
 
     robot_position = np.zeros((len(df), 3))
     robot_velocity = np.zeros((len(df), 3))
@@ -57,18 +59,18 @@ def simulate(args, graph_velocity=False, graph_position=False):
         robot.time_integrate(T)
 
         robot_position[i] = robot.position.reshape(-1)
-        robot_velocity[i] = robot.velocity.reshape(-1)
-        robot_acceleration[i] = robot.acceleration.reshape(-1)
+        robot_velocity[i] = (robot.rotationmatrix(robot.position[2,0]).T @ robot.velocity).reshape(-1)
+        robot_acceleration[i] = (robot.rotationmatrix(robot.position[2,0]).T @ robot.acceleration).reshape(-1)
 
     if graph_velocity:
         plt.figure()
         plt.plot(df['time'], df['angular_velocity'], label='real angular vel')
         plt.plot(df['time'], robot_velocity[:, 2], label='predicted angular vel')
 
-        plt.plot(df['time'], df['y_velocity'], 'm', label='real y vel')
+        plt.plot(df['time'], df['y_velocity'], label='real y vel')
         plt.plot(df['time'], robot_velocity[:, 1], label='predicted y vel')
 
-        plt.plot(df['time'], df['x_velocity'], 'm', label='real x vel')
+        plt.plot(df['time'], df['x_velocity'], label='real x vel')
         plt.plot(df['time'], robot_velocity[:, 0], label='predicted x vel')
 
         plt.title("velocity")
@@ -77,14 +79,14 @@ def simulate(args, graph_velocity=False, graph_position=False):
 
     if graph_position:
         plt.figure()
-        # plt.plot(df['time'], df['angle'], label='real angle')
-        # plt.plot(df['time'], robot_position[:, 2], label='predicted angle')
+        plt.plot(df['time'], df['angle'], label='real angle')
+        plt.plot(df['time'], robot_position[:, 2], label='predicted angle')
         #
-        # plt.plot(df['time'], df['x_position'], 'm', label='real y pos')
-        # plt.plot(df['time'], robot_position[:, 1], label='predicted y pos')
-
-        plt.plot(df['time'], df['y_position'], 'm', label='real x pos')
+        plt.plot(df['time'], df['x_position'], label='real x pos')
         plt.plot(df['time'], robot_position[:, 0], label='predicted x pos')
+
+        plt.plot(df['time'], df['y_position'], label='real y pos')
+        plt.plot(df['time'], robot_position[:, 1], label='predicted y pos')
 
         plt.title("position")
         plt.legend()
@@ -92,22 +94,25 @@ def simulate(args, graph_velocity=False, graph_position=False):
     return np.sum(np.square((robot_velocity - np.array([df['x_velocity'], df['y_velocity'], df['angular_velocity']]).T)))
 
 STEP = .0001
-def grad(a, b, c, d):
-    wrt_a = (simulate([a + STEP, b, c, d]) - simulate([a - STEP, b, c, d])) / 2 * STEP
-    wrt_b = (simulate([a, b + STEP, c, d]) - simulate([a, b - STEP, c, d])) / 2 * STEP
-    wrt_c = (simulate([a, b, c + STEP, d]) - simulate([a, b, c - STEP, d])) / 2 * STEP
-    wrt_d = (simulate([a, b, c, d + STEP]) - simulate([a, b, c, d - STEP])) / 2 * STEP
+def grad(a, b, c, d, e, f, g):
+    wrt_a = (simulate([a + STEP, b, c, d, e, f, g]) - simulate([a - STEP, b, c, d, e, f, g])) / 2 * STEP
+    wrt_b = (simulate([a, b + STEP, c, d, e, f, g]) - simulate([a, b - STEP, c, d, e, f, g])) / 2 * STEP
+    wrt_c = (simulate([a, b, c + STEP, d, e, f, g]) - simulate([a, b, c - STEP, d, e, f, g])) / 2 * STEP
+    wrt_d = (simulate([a, b, c, d + STEP, e, f, g]) - simulate([a, b, c, d - STEP, e, f, g])) / 2 * STEP
+    wrt_e = (simulate([a, b, c, d, e + STEP, f, g]) - simulate([a, b, c, d, e - STEP, f, g])) / 2 * STEP
+    wrt_f = (simulate([a, b, c, d, e, f + STEP, g]) - simulate([a, b, c, d, e, f - STEP, g])) / 2 * STEP
+    wrt_g = (simulate([a, b, c, d, e, f, g + STEP]) - simulate([a, b, c, d, e, f, g - STEP])) / 2 * STEP
 
-    return np.array([wrt_a, wrt_b, wrt_c, wrt_d])
+    return np.array([wrt_a, wrt_b, wrt_c, wrt_d, wrt_e, wrt_f, wrt_g])
 
 
-args = np.array([9.99995933, 1.49950091, 0.04702355, 0.02783458])
+args = np.array([0.99999997, 0.10362316, 0.16846595, 0.61274014, 0.60572202, 0.61270204, 0.60576011])
 simulate(args, graph_velocity=True, graph_position=True)
 for i in range(1000):
     g = grad(*args)
 
     print(g, repr(args), simulate(args))
-    args -= g
+    args -= g * 100
 
 simulate(args, graph_velocity=True, graph_position=True)
 """
