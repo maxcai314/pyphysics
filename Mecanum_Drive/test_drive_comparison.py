@@ -115,11 +115,24 @@ def grad(args, pool):  # use a thread pool to speed this up
 
     results = np.array(pool.map(simulate, args_list.reshape((-1, len(args))))).reshape((len(args), 2))
     derivatives = (results[:, 1] - results[:, 0]) / (2 * STEP)
-    print(derivatives)
     return derivatives / np.linalg.norm(derivatives)
 
+
+def grad_simple(args):
+    derivatives = np.zeros(len(args))
+    for i in range(len(args)):
+        args[i] -= STEP
+        a = simulate(args)
+        args[i] += 2 * STEP
+        b = simulate(args)
+        args[i] -= STEP
+        derivatives[i] = (b - a) / (2 * STEP)
+
+    return derivatives / np.linalg.norm(derivatives)
+
+
 if __name__ == '__main__':
-    DO_MULTITHREADING = True # this might kill your computer
+    DO_MULTITHREADING = True  # this might kill your computer
 
     args = np.array(
         [1.99342709, 0.06464435, 0.26225076, 0.65752611, 0.6100913, 0.63821728, 1.58357671, 1.19970793, 1.00081366,
@@ -131,6 +144,6 @@ if __name__ == '__main__':
             g = grad(args, p)
 
             print(g, repr(args), simulate(args))
-            args -= g * .001
+            args -= g * .0001
 
     simulate(args, graph_velocity=True, graph_position=True)
