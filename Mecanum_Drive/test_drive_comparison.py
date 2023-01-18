@@ -102,7 +102,7 @@ def simulate(args, graph_velocity=False, graph_position=False):
         np.square((robot_velocity - np.array([df['x_velocity'], df['y_velocity'], df['angular_velocity']]).T)))
 
 
-STEP = .01
+STEP = .0001
 
 
 def grad(args, pool):  # use a thread pool to speed this up
@@ -131,6 +131,6 @@ if __name__ == '__main__':
             g = grad(args, p)
 
             print(g, repr(args), simulate(args))
-            args -= g * STEP
+            args -= g * .001
 
     simulate(args, graph_velocity=True, graph_position=True)
