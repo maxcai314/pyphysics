@@ -106,15 +106,16 @@ STEP = .0001
 
 
 def grad(args, pool):  # use a thread pool to speed this up
-    args_list = []
+    args_list = np.zeros((len(args), 2, len(args)))
     for i in range(len(args)):
-        args_list.append(args.copy())
-        args_list.append(args.copy())
-        args_list[1][i] += STEP
-        args_list[0][i] -= STEP
+        args_list[i, 0] = args
+        args_list[i, 0, i] -= STEP
+        args_list[i, 1] = args
+        args_list[i, 1, i] += STEP
 
-    results = np.array(pool.map(simulate, args_list))
-    derivatives = (results[1::2] - results[::2]) / (2 * STEP)
+    results = np.array(pool.map(simulate, args_list.reshape((-1, len(args))))).reshape((len(args), 2))
+    derivatives = (results[:, 1] - results[:, 0]) / (2 * STEP)
+    print(derivatives)
     return derivatives / np.linalg.norm(derivatives)
 
 if __name__ == '__main__':
