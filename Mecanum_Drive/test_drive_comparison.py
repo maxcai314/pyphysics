@@ -68,7 +68,7 @@ class DataSeries:
         for c in ['fl', 'fr', 'bl', 'br']:
             df_resampled[c] = interpolate.interp1d(df['time'], df[c], kind="previous", fill_value="extrapolate")(
                 df_resampled['time'])
-            df_resampled[c][0] = df_resampled[c][1]
+            df_resampled[c][np.isnan(df_resampled[c])] = 0
 
         for c in ['battery_voltage', 'x_position', 'y_position', 'angle', 'x_velocity', 'y_velocity',
                   'angular_velocity']:
@@ -173,8 +173,6 @@ def simulate(sample, args, graph_velocity=False, graph_position=False):
         robot_velocity[i] = (robot.rotationmatrix(robot.position[2, 0]).T @ robot.velocity).reshape(-1)
         robot_acceleration[i] = (robot.rotationmatrix(robot.position[2, 0]).T @ robot.acceleration).reshape(-1)
 
-    robot_position[:, 2] = ((robot_position[:, 2] + np.pi) % (2 * np.pi)) - np.pi
-
     if graph_velocity:
         plt.figure()
         plt.plot(sample.time, sample.x_velocity, label='X Velocity (Measured)')
@@ -238,13 +236,14 @@ def grad_simple(args):
 if __name__ == '__main__':
     DO_MULTITHREADING = True  # this might kill your computer
     samples = [DataSeries.from_csv(f) for f in glob.glob('drive_samples/*.csv')]
-    args = np.array([1.99335099, 0.07465765, 0.26251987, 0, 0, 0, 0])  # 1.19970748, 1.0008127 , 1.20225137])
+    args = np.array([1.55638572, 0.04940392, 0.29003981, 0, 0, 0, 0])
+    simulate(DataSeries.from_csv("drive_samples/driving_around_log_slower_1.csv"), args, graph_velocity=True, graph_position=True)
 
     with Pool(len(args) * 2 if DO_MULTITHREADING else 1) as p:
         for epoch_num in range(500):
 
             costs, g = grad(samples, args, p)
-            # cost = simulate_multiple(samples, args, p)
+            g[:3] = 0
             args -= g * .0001
 
             print(f"epoch {epoch_num}, total cost {np.sum(costs)}, args: {args}")
