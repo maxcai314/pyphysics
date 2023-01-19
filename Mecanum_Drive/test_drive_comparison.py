@@ -244,6 +244,7 @@ if __name__ == '__main__':
 
             costs, g = grad(samples, args, p)
             g[:3] = 0
+            g /= np.linalg.norm(g)
             args -= g * .0001
 
             print(f"epoch {epoch_num}, total cost {np.sum(costs)}, args: {args}")
