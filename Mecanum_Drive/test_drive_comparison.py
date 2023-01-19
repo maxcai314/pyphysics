@@ -206,8 +206,7 @@ def simulate(sample, args, graph_velocity=False, graph_position=False):
 
 STEP = .0001
 
-
-def grad(sample, args, pool):  # use a thread pool to speed this up
+def grad(samples, args, pool):  # use a thread pool to speed this up
     args_list = np.zeros((len(args), 2, len(args)))
     for i in range(len(args)):
         args_list[i, 0] = args
@@ -215,9 +214,12 @@ def grad(sample, args, pool):  # use a thread pool to speed this up
         args_list[i, 1] = args
         args_list[i, 1, i] += STEP
 
-    results = np.array(pool.map(partial(simulate, sample), args_list.reshape((-1, len(args))))).reshape((len(args), 2))
-    derivatives = (results[:, 1] - results[:, 0]) / (2 * STEP)
-    return derivatives / np.linalg.norm(derivatives)
+    all_args = args_list.reshape((-1, len(args)))
+    args_list_for_each_sample = [(sample, args) for sample in samples for args in all_args]
+
+    results = np.array(pool.starmap(simulate, args_list_for_each_sample)).reshape((len(samples), len(args), -1))
+    derivatives = np.sum((results[:, :, 1] - results[:, :, 0]) / (2 * .0001), axis=0)
+    return np.mean(results, axis=(1,2)), derivatives / np.linalg.norm(derivatives)
 
 
 def grad_simple(args):
@@ -240,13 +242,11 @@ if __name__ == '__main__':
 
     with Pool(len(args) * 2 if DO_MULTITHREADING else 1) as p:
         for epoch_num in range(500):
-            costs = np.zeros(len(samples))
 
-            for j in range(len(samples)):
-                g = grad(samples[j], args, p)
-                costs[j] = simulate(samples[j], args)
-                args -= g * .0001
+            costs, g = grad(samples, args, p)
+            # cost = simulate_multiple(samples, args, p)
+            args -= g * .0001
 
-            print(f"epoch {epoch_num}, average cost: {np.mean(costs)}, args: {args}")
+            print(f"epoch {epoch_num}, total cost {np.sum(costs)}, args: {args}")
 
     simulate(args, graph_velocity=True, graph_position=True)
