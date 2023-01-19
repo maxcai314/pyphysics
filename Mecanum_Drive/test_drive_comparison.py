@@ -5,6 +5,7 @@ Created on Sat Jan 14 11:15:00 2023
 
 @author: maxcai
 """
+import glob
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from functools import partial
@@ -15,7 +16,9 @@ import matplotlib.pyplot as plt
 from motor_driven_drivetrain import Drivetrain
 import pandas as pd
 from scipy import interpolate
+
 T = .1
+
 
 @dataclass
 class DataSeries:
@@ -67,7 +70,8 @@ class DataSeries:
                 df_resampled['time'])
             df_resampled[c][0] = df_resampled[c][1]
 
-        for c in ['battery_voltage', 'x_position', 'y_position', 'angle', 'x_velocity', 'y_velocity', 'angular_velocity']:
+        for c in ['battery_voltage', 'x_position', 'y_position', 'angle', 'x_velocity', 'y_velocity',
+                  'angular_velocity']:
             df_resampled[c] = interpolate.interp1d(df['time'], df[c], kind='cubic', fill_value="extrapolate")(
                 df_resampled['time'])
 
@@ -137,18 +141,19 @@ class DataSeries:
                          self.angle[item], self.x_velocity[item], self.y_velocity[item], self.angular_velocity[item],
                          self.x_acceleration[item], self.y_acceleration[item], self.angular_acceleration[item],
                          self.fl[item], self.fr[item], self.bl[item], self.br[item]])
-sample = DataSeries.from_csv('driving_around_log4.csv')
 
-startPos = np.array([0, 0, 0])  # x, y, angle
-startVel = np.array([0, 0, 0])  # xVel, yVel, angleVel
 
 def simulate(sample, args, graph_velocity=False, graph_position=False):
     if len(args) < 3 + 4 + 3:
-        args = np.append(args, np.zeros(3 + 4 + 3 - len(args))) # add zeros for missing parameters
+        args = np.append(args, np.zeros(3 + 4 + 3 - len(args)))  # add zeros for missing parameters
 
     [I_z, I_w, motor_constant, ffl, ffr, bfl, bfr, fx, fy, fpsi] = args
     friction = np.array([[ffl], [ffr], [bfl], [bfr]])
     directional_friction = np.array([[fx], [fy], [fpsi]])
+
+    startPos = np.array([sample.x_position[0], sample.y_position[0], sample.angle[0]])
+    startVel = np.array([sample.x_velocity[0], sample.y_velocity[0], sample.angular_velocity[0]])
+
     robot = Drivetrain(motor_constant=motor_constant, I_z=I_z, I_w=I_w, friction=friction,
                        directional_friction=directional_friction, startPos=startPos.reshape((-1, 1)),
                        startVel=startVel.reshape((-1, 1)))
@@ -230,17 +235,18 @@ def grad_simple(args):
 
 if __name__ == '__main__':
     DO_MULTITHREADING = True  # this might kill your computer
-
-    args = np.array(
-        [1.99335099, 0.07465765, 0.26251987, 0, 0,
-         0, 0, ])#1.19970748, 1.0008127 , 1.20225137])
-    simulate(sample, args, graph_velocity=True, graph_position=True)
+    samples = [DataSeries.from_csv(f) for f in glob.glob('drive_samples/*.csv')]
+    args = np.array([1.99335099, 0.07465765, 0.26251987, 0, 0, 0, 0])  # 1.19970748, 1.0008127 , 1.20225137])
 
     with Pool(len(args) * 2 if DO_MULTITHREADING else 1) as p:
-        for i in range(500):
-            g = grad(sample, args, p)
+        for epoch_num in range(500):
+            costs = np.zeros(len(samples))
 
-            print(g, repr(args), simulate(sample, args))
-            args -= g * .0001
+            for j in range(len(samples)):
+                g = grad(samples[j], args, p)
+                costs[j] = simulate(samples[j], args)
+                args -= g * .0001
+
+            print(f"epoch {epoch_num}, average cost: {np.mean(costs)}, args: {args}")
 
     simulate(args, graph_velocity=True, graph_position=True)
