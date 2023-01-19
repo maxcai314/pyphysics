@@ -232,8 +232,8 @@ if __name__ == '__main__':
     DO_MULTITHREADING = True  # this might kill your computer
 
     args = np.array(
-        [1.99335099, 0.07465765, 0.26251987, 0.65773376, 0.60982428,
-         0.63834153, 1.58333875, 1.19970748, 1.0008127 , 1.20225137])
+        [1.99335099, 0.07465765, 0.26251987, 0, 0,
+         0, 0, ])#1.19970748, 1.0008127 , 1.20225137])
     simulate(sample, args, graph_velocity=True, graph_position=True)
 
     with Pool(len(args) * 2 if DO_MULTITHREADING else 1) as p:
