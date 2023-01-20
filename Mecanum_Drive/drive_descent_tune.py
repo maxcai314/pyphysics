@@ -254,8 +254,9 @@ def grad_simple(args):
 if __name__ == '__main__':
     DO_MULTITHREADING = True  # this might kill your computer
     samples = [DataSeries.from_csv(f) for f in glob.glob('drive_samples/*.csv')]
-    args = np.array([1.55638572, 0.04940392, 0.29003981, .036, .03, .036, .036])
-    print(simulate(DataSeries.from_csv("drive_samples/driving_around_log_slower_6.csv"), args, graph_velocity=True, graph_position=True))
+    args = np.array([1.55687398, 0.0549806 , 0.36827043, 0.05758405, 0.00923156,
+                     0.06716439, 0.02307628])
+    print(simulate(DataSeries.from_csv("drive_samples/driving_around_log_slower_8.csv"), args, graph_velocity=True, graph_position=False))
 
     with Pool(len(args) * 2 if DO_MULTITHREADING else 1) as p:
         for epoch_num in range(100000):
@@ -264,4 +265,4 @@ if __name__ == '__main__':
 
             print(f"epoch {epoch_num}, total cost {np.sum(costs)}, args: {repr(args)}")
 
-    simulate(args, graph_velocity=True, graph_position=True)
+    simulate(args, graph_velocity=True, graph_position=False)
