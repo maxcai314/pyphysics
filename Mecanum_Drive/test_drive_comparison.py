@@ -198,10 +198,13 @@ def simulate(sample, args, graph_velocity=False, graph_position=False):
         plt.title("position")
         plt.legend()
         plt.show()
-    return np.sum(np.square((robot_position - np.array([sample.x_position, sample.y_position, sample.angle]).T))) + np.sum(np.square((robot_velocity - np.array([sample.x_velocity, sample.y_velocity, sample.angular_velocity]).T)))
+    return np.sum(
+        np.square((robot_position - np.array([sample.x_position, sample.y_position, sample.angle]).T))) + np.sum(
+        np.square((robot_velocity - np.array([sample.x_velocity, sample.y_velocity, sample.angular_velocity]).T)))
 
 
 STEP = .0001
+
 
 def grad(samples, args, pool):  # use a thread pool to speed this up
     args_list = np.zeros((len(args), 2, len(args)))
@@ -216,7 +219,25 @@ def grad(samples, args, pool):  # use a thread pool to speed this up
 
     results = np.array(pool.starmap(simulate, args_list_for_each_sample)).reshape((len(samples), len(args), -1))
     derivatives = np.sum((results[:, :, 1] - results[:, :, 0]) / (2 * .0001), axis=0)
-    return np.mean(results, axis=(1,2)), derivatives / np.linalg.norm(derivatives)
+    return np.mean(results, axis=(1, 2)), derivatives / np.linalg.norm(derivatives)
+
+
+def grad_wheel_friction(samples, args, friction, pool):  # use a thread pool to speed this up
+    args_list = np.zeros((2, 7))
+    args_list[0, :3] = args
+    args_list[1, :3] = args
+    args_list[0, 3:] = friction - STEP
+    args_list[1, 3:] = friction + STEP
+    # print(args)
+    args_list[np.newaxis, :, :].repeat(len(samples), axis=0)
+    args_list = args_list.reshape((-1, 7))
+    args_list_for_each_sample = [(sample, args) for sample in samples for args in args_list]
+
+    results = np.array(pool.starmap(simulate, args_list_for_each_sample)).reshape((len(samples), 2))
+    cost_upper = np.mean(np.square(results[:, 1]))
+    cost_lower = np.mean(np.square(results[:, 0]))
+    cost_avg = (cost_upper + cost_lower) / 2 # should be good enough
+    return cost_avg, (cost_upper - cost_lower) / cost_avg
 
 
 def grad_simple(args):
@@ -235,17 +256,16 @@ def grad_simple(args):
 if __name__ == '__main__':
     DO_MULTITHREADING = True  # this might kill your computer
     samples = [DataSeries.from_csv(f) for f in glob.glob('drive_samples/*.csv')]
-    args = np.array([1.55638572,0.04940392,0.29003981,0.36350995,0.17041313,0.46023374,0.40891497])
-    print(simulate(DataSeries.from_csv("drive_samples/driving_around_log_slower_1.csv"), args, graph_velocity=True, graph_position=True))
+    args = np.array([1.55638572, 0.04940392, 0.29003981])
+    friction = .03
+    # print(simulate(DataSeries.from_csv("drive_samples/driving_around_log_slower_1.csv"), args, graph_velocity=True, graph_position=True))
 
     with Pool(len(args) * 2 if DO_MULTITHREADING else 1) as p:
         for epoch_num in range(100000):
+            costs, g = grad_wheel_friction(samples, args, friction, p)
+            friction -= g * .01
+            print(friction)
 
-            costs, g = grad(samples, args, p)
-            g[:3] = 0
-            g /= np.linalg.norm(g)
-            args -= g * .0001
-
-            print(f"epoch {epoch_num}, total cost {np.sum(costs)}, args: {args}")
+            print(f"epoch {epoch_num}, total cost {np.sum(costs)}, args: {repr(args)}, friction: {friction}")
 
     simulate(args, graph_velocity=True, graph_position=True)
