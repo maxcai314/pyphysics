@@ -262,6 +262,6 @@ if __name__ == '__main__':
             costs, g = grad(samples, args, p)
             args -= g * .01
 
-            print(f"epoch {epoch_num}, total cost {np.sum(costs)}, args: {repr(args)}, friction: {friction}")
+            print(f"epoch {epoch_num}, total cost {np.sum(costs)}, args: {repr(args)}")
 
     simulate(args, graph_velocity=True, graph_position=True)
