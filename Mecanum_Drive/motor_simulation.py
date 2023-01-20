@@ -81,13 +81,13 @@ class Motor:
         data = np.zeros((int(time / time_step), 5))
         for i in range(int(time / time_step)):
             self.time_integrate_(voltage, time_step, external_force)
-            data[i] = [i * time_step, voltage, self.current, self.angular_vel, self.torque]
+            data[i] = [i * time_step, voltage, self.current, self.angular_vel, self.torque(voltage, self.angular_vel)]
         return data
 
     def time_integrate_multiple(self, voltages, times, time_step=.01, external_force=0):
         # for each voltage, time pair, integrate the motor until the next voltage, time pair
         data = np.zeros((len(voltages), 5))
-        data[0] = [0, voltages[0], self.current, self.angular_vel, self.torque]
+        data[0] = [0, voltages[0], self.current, self.angular_vel, self.torque(voltages[0], self.angular_vel)]
         for i in range(1, len(voltages)):
             result = self.time_integrate(voltages[i - 1], times[i] - times[i - 1], time_step, external_force)
             data[i] = result[-1]

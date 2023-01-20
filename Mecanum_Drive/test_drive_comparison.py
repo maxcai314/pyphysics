@@ -198,9 +198,7 @@ def simulate(sample, args, graph_velocity=False, graph_position=False):
         plt.title("position")
         plt.legend()
         plt.show()
-    return np.sum(
-        np.square((robot_position - np.array([sample.x_position, sample.y_position, sample.angle]).T))) + np.sum(
-        np.square((robot_velocity - np.array([sample.x_velocity, sample.y_velocity, sample.angular_velocity]).T)))
+    return np.sum(np.square((robot_position - np.array([sample.x_position, sample.y_position, sample.angle]).T)))
 
 
 STEP = .0001
@@ -256,15 +254,13 @@ def grad_simple(args):
 if __name__ == '__main__':
     DO_MULTITHREADING = True  # this might kill your computer
     samples = [DataSeries.from_csv(f) for f in glob.glob('drive_samples/*.csv')]
-    args = np.array([1.55638572, 0.04940392, 0.29003981])
-    friction = .03
-    # print(simulate(DataSeries.from_csv("drive_samples/driving_around_log_slower_1.csv"), args, graph_velocity=True, graph_position=True))
+    args = np.array([1.55638572, 0.04940392, 0.29003981, .036, .03, .036, .036])
+    print(simulate(DataSeries.from_csv("drive_samples/driving_around_log_slower_6.csv"), args, graph_velocity=True, graph_position=True))
 
     with Pool(len(args) * 2 if DO_MULTITHREADING else 1) as p:
         for epoch_num in range(100000):
-            costs, g = grad_wheel_friction(samples, args, friction, p)
-            friction -= g * .01
-            print(friction)
+            costs, g = grad(samples, args, p)
+            args -= g * .01
 
             print(f"epoch {epoch_num}, total cost {np.sum(costs)}, args: {repr(args)}, friction: {friction}")
 

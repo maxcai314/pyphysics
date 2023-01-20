@@ -85,9 +85,9 @@ class Robot():
         Rotation = self.rotationmatrix(angle)
         Rotationdot = self.rotationmatrixdot(angle,q_rdot[2,0])
         
-        q_wdot = self.R @ Rotation.T @ q_rdot
+        q_wdot = self.R @ np.linalg.inv(Rotation) @ q_rdot
         
-        self.H = self.M_r + Rotation @ self.R.T @ self.M_w @ self.R @ Rotation.T
+        self.H = self.M_r + Rotation @ self.R.T @ self.M_w @ self.R @ np.linalg.inv(Rotation)
         self.K = Rotation @ self.R.T @ self.M_w @ self.R @ Rotationdot.T
         self.F_a = Rotation @ (self.R.T @ (Gamma - np.sign(q_wdot) * self.friction) - np.sign(q_rdot) * self.directional_friction)
         q_rddot = np.linalg.inv(self.H) @ (self.F_a - self.K @ q_rdot)
