@@ -126,7 +126,7 @@ class DriveLogReader():
 
 if __name__ == '__main__':
     # simple example code
-    simulation = DriveLogReader('driving_around_log7.csv')
+    simulation = DriveLogReader('drive_samples/driving_around_log7.csv')
     simulation.simulate_from_logs(time_step=1E-3, angle_wrap=True,relative_vel=True)
     simulation.plot_evolution(legends = True)
     simulation.plot_trajectory()
