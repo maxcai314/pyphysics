@@ -17,7 +17,7 @@ class Robot():
                  I_w=[0.05,0.05,0.05,0.05],
                  S_geometric=None,d_geometric=None,alpha=None,
                  x_center=0., y_center=0.,
-                 friction=0.1, directional_friction = np.array([[0],[0],[0]]), q_r=None, q_rdot=None, d1=0.1,d2=-0.1,S3=-0.1,r_odo=0.05):
+                 friction=0.1, q_r=None, q_rdot=None, d1=0.1,d2=-0.1,S3=-0.1,r_odo=0.05):
         self.L=L
         self.l=l
         self.r=r
@@ -28,7 +28,6 @@ class Robot():
         self.d_geometric = d_geometric
         self.alpha = alpha
         self.friction=friction
-        self.directional_friction = directional_friction
         self.q_r = q_r
         self.q_rdot = q_rdot
         self.d1 = d1
@@ -89,7 +88,7 @@ class Robot():
         
         self.H = self.M_r + Rotation @ self.R.T @ self.M_w @ self.R @ np.linalg.inv(Rotation)
         self.K = Rotation @ self.R.T @ self.M_w @ self.R @ Rotationdot.T
-        self.F_a = Rotation @ (self.R.T @ (Gamma - np.sign(q_wdot) * self.friction) - np.sign(q_rdot) * self.directional_friction)
+        self.F_a = Rotation @ (self.R.T @ (Gamma - np.sign(q_wdot) * self.friction))
         q_rddot = np.linalg.inv(self.H) @ (self.F_a - self.K @ q_rdot)
         return q_rddot
     
