@@ -14,7 +14,7 @@ from scipy import interpolate
 
 
 class DriveLogReader():
-    def __init__(self, directory_name, I_z=1.49961, I_w=np.ones(4) * 0.10726657, friction=0.66418, r=0.048):
+    def __init__(self, directory_name, motor_constant=0.36827043, I_z=1.55687398, I_w=np.ones(4)*0.0549806, friction=np.array([[0.05758405], [0.00923156], [0.06716439], [0.02307628]])):
         self.log = pd.read_csv(directory_name).to_dict('records')
         
         self.x_pos_real = np.array([d['x_position'] for d in self.log]) / 39.37 # convert from inch to meter
@@ -59,7 +59,7 @@ class DriveLogReader():
         startPos = self.pos_real[0] # x, y, angle
         startVel = self.vel_real[0] # xVel, yVel, angleVel
         
-        self.robot = Drivetrain(I_z=I_z, I_w=I_w, friction=friction, startPos=startPos, startVel=startVel)
+        self.robot = Drivetrain(motor_constant=motor_constant, I_z=I_z, I_w=I_w, friction=friction, startPos=startPos, startVel=startVel)
 
     def simulate_from_logs(self, time_step = 1E-3, derivative_step = 0.1, angle_wrap = True, relative_vel = True):
         N = int(self.max_time/time_step)
@@ -126,8 +126,8 @@ class DriveLogReader():
 
 if __name__ == '__main__':
     # simple example code
-    simulation = DriveLogReader('drive_samples/driving_around_log7.csv')
-    simulation.simulate_from_logs(time_step=1E-3, angle_wrap=True,relative_vel=True)
+    simulation = DriveLogReader('drive_samples/driving_around_log_slower_8.csv')
+    simulation.simulate_from_logs(time_step=1E-3, angle_wrap=False,relative_vel=True)
     simulation.plot_evolution(legends = True)
     simulation.plot_trajectory()
     simulation.plot_acceleration()
