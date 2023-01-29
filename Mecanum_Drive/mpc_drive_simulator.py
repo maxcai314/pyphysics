@@ -5,18 +5,22 @@ Created on Sat Jan 28 15:02:49 2023
 
 @author: maxcai
 """
-import casadi
+from casadi import *
 # import numpy as np
 import aerosandbox.numpy as np
 
-def rotationmatrix(self, psi):
+
+def rotationmatrix(psi):
     return np.array([[np.cos(psi), -np.sin(psi), 0], [np.sin(psi), np.cos(psi), 0], [0, 0, 1]])
 
-def rotationmatrixdot(self, psi, psidot):
+
+def rotationmatrixdot(psi, psidot):
     return np.array([[-np.sin(psi), -np.cos(psi), 0], [np.cos(psi), -np.sin(psi), 0], [0, 0, 0]]) * psidot
 
+
 class DriveModel():
-    def __init__(self, motor_constant=0.22,I_z=3.,I_w=[0.05,0.05,0.05,0.05],L=0.2,l=0.15,m=11.2,r=0.048,friction=0.1, voltage = 12, q_r=None, q_rdot=None):
+    def __init__(self, motor_constant=0.36827043, I_z=1.55687398, I_w=np.ones(4) * 0.0549806, L=0.115, l=0.1325, m=11.2,
+                 r=0.048, friction=np.array([[0.05758405], [0.00923156], [0.06716439], [0.02307628]])):
         self.armature_resistance = 1.6
         self.motor_constant = motor_constant
 
@@ -40,35 +44,45 @@ class DriveModel():
             self.R[i] = 1 / self.r * np.array(
                 [1, -np.tan(self.alpha[i]) ** -1, -self.d[i] - self.S[i] * (np.tan(self.alpha[i]) ** -1)])
 
-    def get_aceleration(self, position, torques):
+    def get_aceleration(self, position, velocity, torques):
         angle = position[2]
+        angleVel = velocity[2]
         rotation = rotationmatrix(angle)
-        rotationdot = rotationmatrixdot(angle, angle)
+        rotationdot = rotationmatrixdot(angle, angleVel)
 
-        q_wdot = self.R @ np.linalg.inv(rotation) @ angle
+        q_wdot = self.R @ np.linalg.inv(rotation) @ velocity
 
         H = self.M_r + rotation @ self.R.T @ self.M_w @ self.R @ np.linalg.inv(rotation)
         K = rotation @ self.R.T @ self.M_w @ self.R @ rotationdot.T
         F_a = rotation @ (self.R.T @ (torques - np.sign(q_wdot) * self.friction))
-        q_rddot = np.linalg.inv(H) @ (F_a - K @ torques)
+        q_rddot = np.linalg.inv(H) @ (F_a - K @ velocity)
         return q_rddot
 
     def torque(self, position, velocity, inputs):
         angle = position[2]
+        voltage = inputs[4]
 
-        rotation = self.rotationmatrix(angle)
-        ea = self.voltage * inputs[:4]
+        rotation = rotationmatrix(angle)
+        ea = voltage * inputs[:4]
         eb = self.R @ rotation.T @ velocity * self.motor_constant
-
         return (ea - eb) / self.armature_resistance
 
     def continuous_dynamics(self, state, inputs):
         position = state[:3]
         velocity = state[3:]
 
-        self.q_rddot = self.get_aceleration(position, self.torque(position, velocity, inputs))
-        return; #put stuff here lol
+        acceleration = self.get_aceleration(position, velocity, self.torque(position, velocity, inputs))
+        return vertcat(velocity, acceleration)
 
 
+if __name__ == '__main__':
+    robot = DriveModel()
+    position = vertcat(0, 0, 0)  # x, y, angle (meters, meters, radians)
+    velocity = vertcat(0, 0, 0)  # units/second
+    powers = vertcat(1, 1, 1, 1)  # powers must be between -1, 1 for each motor
+    voltage = 12  # battery voltage
 
+    state = vertcat(position, velocity)
+    input = vertcat(powers, voltage)
 
+    print(vertsplit(robot.continuous_dynamics(state, input)))
