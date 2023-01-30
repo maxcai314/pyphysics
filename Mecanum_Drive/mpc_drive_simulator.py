@@ -58,20 +58,21 @@ class DriveModel():
         q_rddot = np.linalg.inv(H) @ (F_a - K @ velocity)
         return q_rddot
 
-    def torque(self, position, velocity, inputs):
+    def torque(self, position, velocity, voltage, inputs):
         angle = position[2]
-        voltage = inputs[4]
+        powers = inputs[:4]
 
         rotation = rotationmatrix(angle)
-        ea = voltage * inputs[:4]
+        ea = voltage * powers
         eb = self.R @ rotation.T @ velocity * self.motor_constant
         return (ea - eb) / self.armature_resistance
 
-    def continuous_dynamics(self, state, inputs):
+    def continuous_dynamics(self, state, inputs, parameters):
         position = state[:3]
         velocity = state[3:]
+        voltage = parameters[0]
 
-        acceleration = self.get_aceleration(position, velocity, self.torque(position, velocity, inputs))
+        acceleration = self.get_aceleration(position, velocity, self.torque(position, velocity, voltage, inputs))
         return vertcat(velocity, acceleration)
 
 
@@ -83,6 +84,7 @@ if __name__ == '__main__':
     voltage = 12  # battery voltage
 
     state = vertcat(position, velocity)
-    input = vertcat(powers, voltage)
+    input = powers
+    parameters = vertcat(voltage)
 
-    print(vertsplit(robot.continuous_dynamics(state, input)))
+    print(vertsplit(robot.continuous_dynamics(state, input, parameters)))
