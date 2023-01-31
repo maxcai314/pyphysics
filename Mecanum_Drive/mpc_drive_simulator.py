@@ -8,6 +8,7 @@ Created on Sat Jan 28 15:02:49 2023
 from casadi import *
 # import numpy as np
 import aerosandbox.numpy as np
+from mecanum_data import DataSeries
 
 
 def rotationmatrix(psi):
@@ -75,15 +76,25 @@ class DriveModel():
         acceleration = self.get_aceleration(position, velocity, self.torque(position, velocity, voltage, inputs))
         return vertcat(velocity, acceleration)
 
-    def eval_obj(self, z): #made non-static just so it's easier to call
-        state = z[:6]
-        inputs = z[6:10]
-        parameters = z[10:]
-        position = state[:3]
-        targetPosition = parameters[1:4]
-        weights = parameters[4:]
-        return (targetPosition - position) * weights #returns an array of errors which will be summed and squared by ForcesPro
+    def eval_obj(self, z, p):  # made non-static just so it's easier to call
+        [desired_values, weights] = horzsplit(p[1:].reshape((2, -1)).T)
+        return weights * (z - desired_values)
 
+def get_configurable_parameters(
+        target_position=vertcat(0, 0, 0),
+        target_velocity=vertcat(0, 0, 0),
+
+        motor_voltage_weights=vertcat(0, 0, 0, 0),
+        position_weights=vertcat(1, 1, 1),
+        velocity_weights=vertcat(0, 0, 0),
+):
+    configurable_parameters = np.zeros((10, 2))
+    configurable_parameters[:4, 1] = motor_voltage_weights.T
+    configurable_parameters[4:7, 0] = target_position.T
+    configurable_parameters[4:7, 1] = position_weights.T
+    configurable_parameters[7:10, 0] = target_velocity.T
+    configurable_parameters[7:10, 1] = velocity_weights.T
+    return configurable_parameters.T.reshape((-1,))
 
 if __name__ == '__main__':
     robot = DriveModel()
@@ -92,17 +103,26 @@ if __name__ == '__main__':
 
     powers = vertcat(1, 1, 1, 1)  # powers must be between -1, 1 for each motor
 
-    voltage = 12  # battery voltage
-    targetPosition = vertcat(1, 1, 0)  # x, y, angle (meters, meters, radians)
-    xWeight = 1 # weights for cost function
-    yWeight = 1
-    angleWeight = 1
-    weights = vertcat(xWeight, yWeight, angleWeight)
-
     state = vertcat(position, velocity)
-    input = powers
-    parameters = vertcat(voltage, targetPosition, weights)
-    z = vertcat(state, input, parameters)
 
-    print(vertsplit(robot.continuous_dynamics(state, input, parameters))) # outputs x,y,angle velocities and accelerations
-    print(robot.eval_obj(z)) # outputs an array that needs to be squared and summed for cost function
+
+    data = DataSeries.from_csv("drive_samples/driving_around_log_slower_8.csv")
+    configurable_parameters = get_configurable_parameters()
+    all_configurable_params = np.zeros((len(data), len(configurable_parameters)))
+    all_configurable_params[:] = configurable_parameters
+    all_params = np.hstack((data.battery_voltage.reshape((-1,1)), all_configurable_params))
+
+    position_states = np.zeros((len(data), 3))
+
+    for i in range(len(data)):
+        input = vertcat(data.fl[i], data.fr[i], data.bl[i], data.br[i])
+        state += robot.continuous_dynamics(state, input, all_params[i]) * data.T
+        position_states[i] = state[:3].T
+
+    import matplotlib.pyplot as plt
+
+    plt.xlabel("time")
+    plt.ylabel("x position")
+    plt.plot(data.time, position_states[:, 2], label="x position pred")
+    plt.plot(data.time, data.angle, label="x position actual")
+    plt.show()

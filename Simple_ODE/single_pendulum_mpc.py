@@ -13,7 +13,7 @@ from casadi import *
 import do_mpc
 
 model_type = 'continuous' # either 'discrete' or 'continuous'
-model = do_mpc.model.Model(model_type)
+model = do_mpc.stages.Model(model_type)
 
 theta = model.set_variable(var_type='_x', var_name='theta', shape=(1,1))
 omega = model.set_variable(var_type='_x', var_name='omega', shape=(1,1))
