@@ -44,7 +44,6 @@ int main() {
     }
 
     mecanum_mpc_solve((mecanum_mpc_params *) params, output, info, args, debug_output, &mecanum_mpc_adtool2forces);
-    printf("pobj: %f", info->pobj);
     // print output
     for (int i = 0; i < NUMSTAGES; i++) {
         printf("Stage %d: ", i);
@@ -53,4 +52,9 @@ int main() {
         }
         printf("\n");
     }
+    printf("pobj: %f, solvetime: %f ms\n", info->pobj, info->solvetime * 1000);
+
+    free(params);
+    free(output);
+    free(info);
 }
