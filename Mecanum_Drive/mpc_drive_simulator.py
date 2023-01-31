@@ -77,8 +77,11 @@ class DriveModel():
         return vertcat(velocity, acceleration)
 
     def eval_obj(self, z, p):  # made non-static just so it's easier to call
+        # z = z.reshape((-1,))
+        # p = p.reshape((-1,))
         [desired_values, weights] = horzsplit(p[1:].reshape((2, -1)).T)
-        return weights * (z - desired_values)
+        result = weights * (z - desired_values)
+        return np.sum(result**2)
 
 def get_configurable_parameters(
         target_position=vertcat(0, 0, 0),
@@ -94,7 +97,7 @@ def get_configurable_parameters(
     configurable_parameters[4:7, 1] = position_weights.T
     configurable_parameters[7:10, 0] = target_velocity.T
     configurable_parameters[7:10, 1] = velocity_weights.T
-    return configurable_parameters.T.reshape((-1,))
+    return configurable_parameters.reshape((-1,))
 
 if __name__ == '__main__':
     robot = DriveModel()
