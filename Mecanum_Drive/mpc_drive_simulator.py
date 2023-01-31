@@ -75,16 +75,34 @@ class DriveModel():
         acceleration = self.get_aceleration(position, velocity, self.torque(position, velocity, voltage, inputs))
         return vertcat(velocity, acceleration)
 
+    def eval_obj(self, z): #made non-static just so it's easier to call
+        state = z[:6]
+        inputs = z[6:10]
+        parameters = z[10:]
+        position = state[:3]
+        targetPosition = parameters[1:4]
+        weights = parameters[4:]
+        return (targetPosition - position) * weights #returns an array of errors which will be summed and squared by ForcesPro
+
 
 if __name__ == '__main__':
     robot = DriveModel()
     position = vertcat(0, 0, 0)  # x, y, angle (meters, meters, radians)
     velocity = vertcat(0, 0, 0)  # units/second
+
     powers = vertcat(1, 1, 1, 1)  # powers must be between -1, 1 for each motor
+
     voltage = 12  # battery voltage
+    targetPosition = vertcat(1, 1, 0)  # x, y, angle (meters, meters, radians)
+    xWeight = 1 # weights for cost function
+    yWeight = 1
+    angleWeight = 1
+    weights = vertcat(xWeight, yWeight, angleWeight)
 
     state = vertcat(position, velocity)
     input = powers
-    parameters = vertcat(voltage)
+    parameters = vertcat(voltage, targetPosition, weights)
+    z = vertcat(state, input, parameters)
 
-    print(vertsplit(robot.continuous_dynamics(state, input, parameters)))
+    print(vertsplit(robot.continuous_dynamics(state, input, parameters))) # outputs x,y,angle velocities and accelerations
+    print(robot.eval_obj(z)) # outputs an array that needs to be squared and summed for cost function
