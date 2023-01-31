@@ -32,7 +32,7 @@ robot = DriveModel()
 model.objective = robot.eval_obj
 model.eq = lambda z, p: forcespro.nlp.integrate(robot.continuous_dynamics, z[nin:], z[:nin], p,
                                                 integrator=forcespro.nlp.integrators.RK4,
-                                                stepsize=1 / frequency)
+                                                stepsize=time_lookahead / frequency)
 
 model.E = np.hstack((np.zeros((nstate, nin)), np.eye(nstate)))
 
@@ -49,6 +49,7 @@ codeoptions.optlevel = 2
 
 codeoptions.overwrite = 1
 m = model.generate_solver(codeoptions)
+# from mecanum_mpc.interface.mecanum_mpc_py import mecanum_mpc_solve as m
 m = Solver.from_directory("mecanum_mpc")
 
 
