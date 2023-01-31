@@ -8,7 +8,8 @@ Created on Sat Jan 28 15:02:49 2023
 from casadi import *
 # import numpy as np
 import aerosandbox.numpy as np
-from mecanum_data import DataSeries
+
+from PyPhysics.Mecanum_Drive.mecanum_data import DataSeries
 
 
 def rotationmatrix(psi):
@@ -109,7 +110,7 @@ if __name__ == '__main__':
     state = vertcat(position, velocity)
 
 
-    data = DataSeries.from_csv("drive_samples/driving_around_log_slower_8.csv")
+    data = DataSeries.from_csv("../Mecanum_Drive/drive_samples/driving_around_log_slower_8.csv")
     configurable_parameters = get_configurable_parameters()
     all_configurable_params = np.zeros((len(data), len(configurable_parameters)))
     all_configurable_params[:] = configurable_parameters

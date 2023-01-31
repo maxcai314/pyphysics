@@ -13,7 +13,7 @@ from forcespro.nlp.solver import Solver
 import forcespro
 from forcespro import CodeOptions
 
-from PyPhysics.Mecanum_Drive.mpc_drive_simulator import DriveModel, get_configurable_parameters
+from PyPhysics.MPC.mpc_drive_simulator import DriveModel, get_configurable_parameters
 
 time_lookahead = 1
 frequency = 10
@@ -44,10 +44,11 @@ codeoptions = CodeOptions("mecanum_mpc")
 
 codeoptions.solvemethod = 'PDIP_NLP'
 
-codeoptions.printlevel = 2
+codeoptions.printlevel = 0
+codeoptions.optlevel = 2
 
 codeoptions.overwrite = 1
-# m = model.generate_solver(codeoptions)
+m = model.generate_solver(codeoptions)
 m = Solver.from_directory("mecanum_mpc")
 
 
