@@ -13,7 +13,7 @@ from forcespro.nlp.solver import Solver
 import forcespro
 from forcespro import CodeOptions
 
-from PyPhysics.MPC.mpc_drive_simulator import DriveModel, get_configurable_parameters
+from MPC.mpc_drive_simulator import DriveModel, get_configurable_parameters
 
 time_lookahead = 1
 frequency = 10
