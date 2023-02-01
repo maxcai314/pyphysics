@@ -1,6 +1,6 @@
 % mecanum_mpc : A fast customized optimization solver.
 % 
-% Copyright (C) 2013-2022 EMBOTECH AG [info@embotech.com]. All rights reserved.
+% Copyright (C) 2013-2023 EMBOTECH AG [info@embotech.com]. All rights reserved.
 % 
 % 
 % This software is intended for simulation and testing purposes only. 
@@ -67,16 +67,16 @@ function mecanum_mpc_createCoderMatlabFunction(modelname, blockname, useCompactB
     end
     
     function_name = 'mecanum_mpc_coderFunction.m';
-    position = [170, 99, 650, 350];
-    parameter_sizes = struct('x0', '[100,1]',...
+    position = [170, 99, 650, 605];
+    parameter_sizes = struct('x0', '[250,1]',...
                              'xinit', '[6,1]',...
-                             'all_parameters', '[210,1]');
+                             'all_parameters', '[525,1]');
     if useCompactBlock
         function_name = 'mecanum_mpc_coderFunctioncompact.m';
         position = [170, 99, 650, 231];
-        parameter_sizes = struct('x0', '[100,1]',...
+        parameter_sizes = struct('x0', '[250,1]',...
                                  'xinit', '[6,1]',...
-                                 'all_parameters', '[210,1]');
+                                 'all_parameters', '[525,1]');
     end
     
     result = exist(modelname, 'file');

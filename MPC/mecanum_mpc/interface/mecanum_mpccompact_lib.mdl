@@ -60,13 +60,13 @@ Model {
       }
     }
   }
-  Created		  "1/31/2023 7:28:17 AM"
+  Created		  "2/1/2023 1:02:57 AM"
   Creator		  "embotech AG"
   UpdateHistory		  "UpdateHistoryNever"
   ModifiedByFormat	  "%<Auto>"
   LastModifiedBy	  "embotech AG"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "1/31/2023 7:28:17 AM"
+  LastModifiedDate	  "2/1/2023 1:02:57 AM"
   RTWModifiedTimeStamp	  315310195
   ModelVersionFormat	  "1.%<AutoIncrement:2>"
   ConfigurationManager	  "None"
@@ -781,7 +781,7 @@ Model {
 	Description		" ---- Simulink block encapsulating your customized solver mecanum_mpc ---- \n\n"
 				"mecanum_mpc : A fast customized optimization solver.\n"
 "\n"
-"Copyright (C) 2013-2022 EMBOTECH AG [info@embotech.com]. All rights reserved.\n"
+"Copyright (C) 2013-2023 EMBOTECH AG [info@embotech.com]. All rights reserved.\n"
 "\n"
 "\n"
 "This software is intended for simulation and testing purposes only. \n"
@@ -804,12 +804,12 @@ Model {
 	Help			"mecanum_mpc_simulinkBlockcompact provides an easy Simulink interface for simulating your customized solver.  \n"
 	"\nOUTPUTS = mecanum_mpc(INPUTS) solves an optimization problem where:\n\n"
 	"INPUTS:\n"
-	" - x0 - matrix of size [100x1]\n  "
+	" - x0 - matrix of size [250x1]\n  "
 " - xinit - matrix of size [6x1]\n  "
-" - all_parameters - matrix of size [210x1]\n  "
+" - all_parameters - matrix of size [525x1]\n  "
 
 	"\nOUTPUTS:\n"
-	" - outputs - column vector of length 100\n  "
+	" - outputs - column vector of length 250\n  "
 
 	"\n For more information, see https://forces.embotech.com/Documentation/simulink_interface/index.html \n "
 

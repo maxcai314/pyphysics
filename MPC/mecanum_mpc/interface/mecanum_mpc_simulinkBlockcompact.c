@@ -1,7 +1,7 @@
 /*
 mecanum_mpc : A fast customized optimization solver.
 
-Copyright (C) 2013-2022 EMBOTECH AG [info@embotech.com]. All rights reserved.
+Copyright (C) 2013-2023 EMBOTECH AG [info@embotech.com]. All rights reserved.
 
 
 This software is intended for simulation and testing purposes only. 
@@ -71,7 +71,7 @@ static void mdlInitializeSizes(SimStruct *S)
     if (!ssSetNumInputPorts(S, 3)) return;
     	
 	/* Input Port 0 */
-    ssSetInputPortMatrixDimensions(S,  0, 100, 1);
+    ssSetInputPortMatrixDimensions(S,  0, 250, 1);
     ssSetInputPortDataType(S, 0, SS_DOUBLE);
     ssSetInputPortComplexSignal(S, 0, COMPLEX_NO); /* no complex signals suppported */
     ssSetInputPortDirectFeedThrough(S, 0, 1); /* Feedthrough enabled */
@@ -85,7 +85,7 @@ static void mdlInitializeSizes(SimStruct *S)
     ssSetInputPortRequiredContiguous(S, 1, 1); /*direct input signal access*/
 	
 	/* Input Port 2 */
-    ssSetInputPortMatrixDimensions(S,  2, 210, 1);
+    ssSetInputPortMatrixDimensions(S,  2, 525, 1);
     ssSetInputPortDataType(S, 2, SS_DOUBLE);
     ssSetInputPortComplexSignal(S, 2, COMPLEX_NO); /* no complex signals suppported */
     ssSetInputPortDirectFeedThrough(S, 2, 1); /* Feedthrough enabled */
@@ -97,7 +97,7 @@ static void mdlInitializeSizes(SimStruct *S)
     if (!ssSetNumOutputPorts(S, 1)) return;    
 		
 	/* Output Port 0 */
-    ssSetOutputPortMatrixDimensions(S,  0, 100, 1);
+    ssSetOutputPortMatrixDimensions(S,  0, 250, 1);
     ssSetOutputPortDataType(S, 0, SS_DOUBLE);
     ssSetOutputPortComplexSignal(S, 0, COMPLEX_NO); /* no complex signals suppported */
 
@@ -200,7 +200,7 @@ static void mdlOutputs(SimStruct *S, int_T tid)
 	solver_int32_default solver_exitflag;
 
 	/* Copy inputs */
-	for(i = 0; i < 100; i++)
+	for(i = 0; i < 250; i++)
 	{
 		params.x0[i] = (double) x0[i];
 	}
@@ -210,7 +210,7 @@ static void mdlOutputs(SimStruct *S, int_T tid)
 		params.xinit[i] = (double) xinit[i];
 	}
 
-	for(i = 0; i < 210; i++)
+	for(i = 0; i < 525; i++)
 	{
 		params.all_parameters[i] = (double) all_parameters[i];
 	}
@@ -294,6 +294,81 @@ static void mdlOutputs(SimStruct *S, int_T tid)
 	for(i = 0; i < 10; i++)
 	{
 		outputs[90 + i] = (real_T) output.x10[i];
+	}
+
+	for(i = 0; i < 10; i++)
+	{
+		outputs[100 + i] = (real_T) output.x11[i];
+	}
+
+	for(i = 0; i < 10; i++)
+	{
+		outputs[110 + i] = (real_T) output.x12[i];
+	}
+
+	for(i = 0; i < 10; i++)
+	{
+		outputs[120 + i] = (real_T) output.x13[i];
+	}
+
+	for(i = 0; i < 10; i++)
+	{
+		outputs[130 + i] = (real_T) output.x14[i];
+	}
+
+	for(i = 0; i < 10; i++)
+	{
+		outputs[140 + i] = (real_T) output.x15[i];
+	}
+
+	for(i = 0; i < 10; i++)
+	{
+		outputs[150 + i] = (real_T) output.x16[i];
+	}
+
+	for(i = 0; i < 10; i++)
+	{
+		outputs[160 + i] = (real_T) output.x17[i];
+	}
+
+	for(i = 0; i < 10; i++)
+	{
+		outputs[170 + i] = (real_T) output.x18[i];
+	}
+
+	for(i = 0; i < 10; i++)
+	{
+		outputs[180 + i] = (real_T) output.x19[i];
+	}
+
+	for(i = 0; i < 10; i++)
+	{
+		outputs[190 + i] = (real_T) output.x20[i];
+	}
+
+	for(i = 0; i < 10; i++)
+	{
+		outputs[200 + i] = (real_T) output.x21[i];
+	}
+
+	for(i = 0; i < 10; i++)
+	{
+		outputs[210 + i] = (real_T) output.x22[i];
+	}
+
+	for(i = 0; i < 10; i++)
+	{
+		outputs[220 + i] = (real_T) output.x23[i];
+	}
+
+	for(i = 0; i < 10; i++)
+	{
+		outputs[230 + i] = (real_T) output.x24[i];
+	}
+
+	for(i = 0; i < 10; i++)
+	{
+		outputs[240 + i] = (real_T) output.x25[i];
 	}
 
 	

@@ -6,13 +6,13 @@ requires_callback = True
 lib = "lib/libmecanum_mpc.so"
 lib_static = "lib/libmecanum_mpc.a"
 c_header = "include/mecanum_mpc.h"
-nstages = 10
+nstages = 25
 
 # Parameter             | Type    | Scalar type      | Ctypes type    | Numpy type   | Shape     | Len
 params = \
-[("x0"                  , "dense" , ""               , ctypes.c_double, numpy.float64, (100,   1),  100),
+[("x0"                  , "dense" , ""               , ctypes.c_double, numpy.float64, (250,   1),  250),
  ("xinit"               , "dense" , ""               , ctypes.c_double, numpy.float64, (  6,   1),    6),
- ("all_parameters"      , "dense" , ""               , ctypes.c_double, numpy.float64, (210,   1),  210)]
+ ("all_parameters"      , "dense" , ""               , ctypes.c_double, numpy.float64, (525,   1),  525)]
 
 # Output                | Type    | Ctypes type    | Numpy type   | Shape     | Len
 outputs = \
@@ -25,7 +25,22 @@ outputs = \
  ("x07"                 , ""               , ctypes.c_double, numpy.float64,     ( 10,),   10),
  ("x08"                 , ""               , ctypes.c_double, numpy.float64,     ( 10,),   10),
  ("x09"                 , ""               , ctypes.c_double, numpy.float64,     ( 10,),   10),
- ("x10"                 , ""               , ctypes.c_double, numpy.float64,     ( 10,),   10)]
+ ("x10"                 , ""               , ctypes.c_double, numpy.float64,     ( 10,),   10),
+ ("x11"                 , ""               , ctypes.c_double, numpy.float64,     ( 10,),   10),
+ ("x12"                 , ""               , ctypes.c_double, numpy.float64,     ( 10,),   10),
+ ("x13"                 , ""               , ctypes.c_double, numpy.float64,     ( 10,),   10),
+ ("x14"                 , ""               , ctypes.c_double, numpy.float64,     ( 10,),   10),
+ ("x15"                 , ""               , ctypes.c_double, numpy.float64,     ( 10,),   10),
+ ("x16"                 , ""               , ctypes.c_double, numpy.float64,     ( 10,),   10),
+ ("x17"                 , ""               , ctypes.c_double, numpy.float64,     ( 10,),   10),
+ ("x18"                 , ""               , ctypes.c_double, numpy.float64,     ( 10,),   10),
+ ("x19"                 , ""               , ctypes.c_double, numpy.float64,     ( 10,),   10),
+ ("x20"                 , ""               , ctypes.c_double, numpy.float64,     ( 10,),   10),
+ ("x21"                 , ""               , ctypes.c_double, numpy.float64,     ( 10,),   10),
+ ("x22"                 , ""               , ctypes.c_double, numpy.float64,     ( 10,),   10),
+ ("x23"                 , ""               , ctypes.c_double, numpy.float64,     ( 10,),   10),
+ ("x24"                 , ""               , ctypes.c_double, numpy.float64,     ( 10,),   10),
+ ("x25"                 , ""               , ctypes.c_double, numpy.float64,     ( 10,),   10)]
 
 # Info Struct Fields
 info = \
@@ -54,6 +69,21 @@ info = \
 # Dynamics dimensions
 #   nvar    |   neq   |   dimh    |   dimp    |   diml    |   dimu    |   dimhl   |   dimhu    
 dynamics_dims = [
+	(10, 6, 0, 21, 4, 4, 0, 0), 
+	(10, 6, 0, 21, 4, 4, 0, 0), 
+	(10, 6, 0, 21, 4, 4, 0, 0), 
+	(10, 6, 0, 21, 4, 4, 0, 0), 
+	(10, 6, 0, 21, 4, 4, 0, 0), 
+	(10, 6, 0, 21, 4, 4, 0, 0), 
+	(10, 6, 0, 21, 4, 4, 0, 0), 
+	(10, 6, 0, 21, 4, 4, 0, 0), 
+	(10, 6, 0, 21, 4, 4, 0, 0), 
+	(10, 6, 0, 21, 4, 4, 0, 0), 
+	(10, 6, 0, 21, 4, 4, 0, 0), 
+	(10, 6, 0, 21, 4, 4, 0, 0), 
+	(10, 6, 0, 21, 4, 4, 0, 0), 
+	(10, 6, 0, 21, 4, 4, 0, 0), 
+	(10, 6, 0, 21, 4, 4, 0, 0), 
 	(10, 6, 0, 21, 4, 4, 0, 0), 
 	(10, 6, 0, 21, 4, 4, 0, 0), 
 	(10, 6, 0, 21, 4, 4, 0, 0), 

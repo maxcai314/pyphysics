@@ -60,13 +60,13 @@ Model {
       }
     }
   }
-  Created		  "1/31/2023 7:28:17 AM"
+  Created		  "2/1/2023 1:02:57 AM"
   Creator		  "embotech AG"
   UpdateHistory		  "UpdateHistoryNever"
   ModifiedByFormat	  "%<Auto>"
   LastModifiedBy	  "embotech AG"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "1/31/2023 7:28:17 AM"
+  LastModifiedDate	  "2/1/2023 1:02:57 AM"
   RTWModifiedTimeStamp	  315310195
   ModelVersionFormat	  "1.%<AutoIncrement:2>"
   ConfigurationManager	  "None"
@@ -767,8 +767,8 @@ Model {
       BlockType		      S-Function
       Name		      "mecanum_mpc"
       SID		      "1"
-      Ports		      [3, 10]
-      Position		      [170, 99, 650, 180]
+      Ports		      [3, 25]
+      Position		      [170, 99, 650, 425]
       ZOrder		      1
       FunctionName	      "mecanum_mpc_simulinkBlock"
 	  SFunctionModules	      "mecanum_mpc mecanum_mpc_simulinkBlock"
@@ -781,7 +781,7 @@ Model {
 	Description		" ---- Simulink block encapsulating your customized solver mecanum_mpc ---- \n\n"
 				"mecanum_mpc : A fast customized optimization solver.\n"
 "\n"
-"Copyright (C) 2013-2022 EMBOTECH AG [info@embotech.com]. All rights reserved.\n"
+"Copyright (C) 2013-2023 EMBOTECH AG [info@embotech.com]. All rights reserved.\n"
 "\n"
 "\n"
 "This software is intended for simulation and testing purposes only. \n"
@@ -804,9 +804,9 @@ Model {
 	Help			"mecanum_mpc_simulinkBlock provides an easy Simulink interface for simulating your customized solver.  \n"
 	"\nOUTPUTS = mecanum_mpc(INPUTS) solves an optimization problem where:\n\n"
 	"INPUTS:\n"
-	" - x0 - matrix of size [100x1]\n  "
+	" - x0 - matrix of size [250x1]\n  "
 " - xinit - matrix of size [6x1]\n  "
-" - all_parameters - matrix of size [210x1]\n  "
+" - all_parameters - matrix of size [525x1]\n  "
 
 	"\nOUTPUTS:\n"
 	" - x01 - column vector of length 10\n  "
@@ -819,6 +819,21 @@ Model {
 " - x08 - column vector of length 10\n  "
 " - x09 - column vector of length 10\n  "
 " - x10 - column vector of length 10\n  "
+" - x11 - column vector of length 10\n  "
+" - x12 - column vector of length 10\n  "
+" - x13 - column vector of length 10\n  "
+" - x14 - column vector of length 10\n  "
+" - x15 - column vector of length 10\n  "
+" - x16 - column vector of length 10\n  "
+" - x17 - column vector of length 10\n  "
+" - x18 - column vector of length 10\n  "
+" - x19 - column vector of length 10\n  "
+" - x20 - column vector of length 10\n  "
+" - x21 - column vector of length 10\n  "
+" - x22 - column vector of length 10\n  "
+" - x23 - column vector of length 10\n  "
+" - x24 - column vector of length 10\n  "
+" - x25 - column vector of length 10\n  "
 
 	"\n For more information, see https://forces.embotech.com/Documentation/simulink_interface/index.html \n "
 
@@ -835,6 +850,21 @@ Model {
 "port_label('output', 8, 'x08') \n  "
 "port_label('output', 9, 'x09') \n  "
 "port_label('output', 10, 'x10') \n  "
+"port_label('output', 11, 'x11') \n  "
+"port_label('output', 12, 'x12') \n  "
+"port_label('output', 13, 'x13') \n  "
+"port_label('output', 14, 'x14') \n  "
+"port_label('output', 15, 'x15') \n  "
+"port_label('output', 16, 'x16') \n  "
+"port_label('output', 17, 'x17') \n  "
+"port_label('output', 18, 'x18') \n  "
+"port_label('output', 19, 'x19') \n  "
+"port_label('output', 20, 'x20') \n  "
+"port_label('output', 21, 'x21') \n  "
+"port_label('output', 22, 'x22') \n  "
+"port_label('output', 23, 'x23') \n  "
+"port_label('output', 24, 'x24') \n  "
+"port_label('output', 25, 'x25') \n  "
 "if( exist('FORCES_PRO_Logo.jpg','file') ), image(imread('FORCES_PRO_Logo.jpg'),'center','on'); elseif( exist(['interface',filesep,'FORCES_PRO_Logo.jpg'],'file') ), image(imread(['interface',filesep,'FORCES_PRO_Logo.jpg']),'center','on'); elseif( exist(['mecanum_mpc',filesep,'interface',filesep,'FORCES_PRO_Logo.jpg'],'file') ), image(imread(['mecanum_mpc',filesep,'interface',filesep,'FORCES_PRO_Logo.jpg']),'center','on'); end \n "
 
       }
