@@ -6,6 +6,8 @@
 #include "mecanum_mpc.h"
 #include "mecanum_mpc_memory.h"
 
+#include "musl_compat.h"
+
 #define NUMSTAGES 10
 #define NUMVARS 10
 

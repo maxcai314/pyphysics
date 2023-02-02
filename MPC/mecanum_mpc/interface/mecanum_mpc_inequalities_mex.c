@@ -1,7 +1,7 @@
 /*
 mecanum_mpc : A fast customized optimization solver.
 
-Copyright (C) 2013-2023 EMBOTECH AG [info@embotech.com]. All rights reserved.
+Copyright (C) 2013-2022 EMBOTECH AG [info@embotech.com]. All rights reserved.
 
 
 This software is intended for simulation and testing purposes only. 

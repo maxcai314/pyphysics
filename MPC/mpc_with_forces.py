@@ -48,12 +48,12 @@ if __name__ == '__main__':
     codeoptions.avx = -1
     codeoptions.sse = -1
     codeoptions.nlp.compact_code = 1
-    codeoptions.server = 'https://forces-test.embotech.com'
+#    codeoptions.server = 'https://forces-test.embotech.com'
     codeoptions.cleanup = 0
 
 
-    codeoptions.printlevel = 2
-    codeoptions.optlevel = 3
+    codeoptions.printlevel = 0
+    codeoptions.optlevel = 2
 
     codeoptions.overwrite = 1
     m = model.generate_solver(codeoptions)
