@@ -53,7 +53,7 @@ if __name__ == '__main__':
 
 
     codeoptions.printlevel = 2
-    codeoptions.optlevel = 0
+    codeoptions.optlevel = 3
 
     codeoptions.overwrite = 1
     m = model.generate_solver(codeoptions)
