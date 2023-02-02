@@ -39,7 +39,7 @@ int main() {
     FILE *debug_output = stdout;
 
     for (int i = 0; i < (sizeof(*params) / sizeof(mecanum_mpc_float)); i++) {
-        scanf("%lf", &params->x0[i]);
+        scanf("%lf", ((mecanum_mpc_float *) params) + i);
     }
 
     mecanum_mpc_solve((mecanum_mpc_params *) params, output, info, args, debug_output, &mecanum_mpc_adtool2forces);
