@@ -21,9 +21,9 @@
 % 
 % [OUTPUTS] = mecanum_mpc(INPUTS) solves an optimization problem where:
 % Inputs:
-% - x0 - matrix of size [250x1]
+% - x0 - matrix of size [100x1]
 % - xinit - matrix of size [6x1]
-% - all_parameters - matrix of size [525x1]
+% - all_parameters - matrix of size [210x1]
 % Outputs:
 % - x01 - column vector of length 10
 % - x02 - column vector of length 10
@@ -35,22 +35,7 @@
 % - x08 - column vector of length 10
 % - x09 - column vector of length 10
 % - x10 - column vector of length 10
-% - x11 - column vector of length 10
-% - x12 - column vector of length 10
-% - x13 - column vector of length 10
-% - x14 - column vector of length 10
-% - x15 - column vector of length 10
-% - x16 - column vector of length 10
-% - x17 - column vector of length 10
-% - x18 - column vector of length 10
-% - x19 - column vector of length 10
-% - x20 - column vector of length 10
-% - x21 - column vector of length 10
-% - x22 - column vector of length 10
-% - x23 - column vector of length 10
-% - x24 - column vector of length 10
-% - x25 - column vector of length 10
-function [x01, x02, x03, x04, x05, x06, x07, x08, x09, x10, x11, x12, x13, x14, x15, x16, x17, x18, x19, x20, x21, x22, x23, x24, x25] = mecanum_mpc(x0, xinit, all_parameters)
+function [x01, x02, x03, x04, x05, x06, x07, x08, x09, x10] = mecanum_mpc(x0, xinit, all_parameters)
     
     [output, ~, ~] = mecanum_mpcBuildable.forcesCall(x0, xinit, all_parameters);
     x01 = output.x01;
@@ -63,19 +48,4 @@ function [x01, x02, x03, x04, x05, x06, x07, x08, x09, x10, x11, x12, x13, x14, 
     x08 = output.x08;
     x09 = output.x09;
     x10 = output.x10;
-    x11 = output.x11;
-    x12 = output.x12;
-    x13 = output.x13;
-    x14 = output.x14;
-    x15 = output.x15;
-    x16 = output.x16;
-    x17 = output.x17;
-    x18 = output.x18;
-    x19 = output.x19;
-    x20 = output.x20;
-    x21 = output.x21;
-    x22 = output.x22;
-    x23 = output.x23;
-    x24 = output.x24;
-    x25 = output.x25;
 end

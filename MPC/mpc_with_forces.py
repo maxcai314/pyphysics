@@ -6,6 +6,8 @@ Created on Sat Jan 28 15:02:49 2023
 @author: maxcai
 """
 import numpy as np
+setattr(np, 'float',  float)
+
 from casadi import vertcat, horzcat
 from forcespro.nlp.symbolicModel import SymbolicModel
 from forcespro.nlp.solver import Solver
@@ -15,8 +17,8 @@ from forcespro import CodeOptions
 
 from mpc_drive_simulator import DriveModel, get_configurable_parameters
 
-time_lookahead = 5
-frequency = 5
+time_lookahead = 1
+frequency = 10
 N = int(time_lookahead * frequency)
 
 nin = 4

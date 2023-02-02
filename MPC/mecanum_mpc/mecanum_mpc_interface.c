@@ -59,7 +59,7 @@ extern solver_int32_default mecanum_mpc_adtool2forces(mecanum_mpc_float *x,     
 	
 
 	/* Allocate working arrays for AD tool */
-	mecanum_mpc_float w[311];
+	mecanum_mpc_float w[314];
 	
     /* temporary storage for AD tool sparse output */
     mecanum_mpc_callback_float this_f = (mecanum_mpc_callback_float) 0.0;
@@ -81,7 +81,7 @@ extern solver_int32_default mecanum_mpc_adtool2forces(mecanum_mpc_float *x,     
     in[2] = l;
     in[3] = y;
 
-	if ((0 <= stage && stage <= 23))
+	if ((0 <= stage && stage <= 8))
 	{
 		
 		
@@ -117,7 +117,7 @@ extern solver_int32_default mecanum_mpc_adtool2forces(mecanum_mpc_float *x,     
 			mecanum_mpc_sparse2fullcopy(nrow, ncol, colind, row, nabla_c_sparse, nabla_c);
 		}
 	}
-	if ((24 == stage))
+	if ((9 == stage))
 	{
 		
 		

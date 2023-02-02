@@ -261,7 +261,7 @@ if __name__ == '__main__':
     with Pool(len(args) * 2 if DO_MULTITHREADING else 1) as p:
         for epoch_num in range(100000):
             costs, g = grad(samples, args, p)
-            args -= g * .01
+            args -= g * .0001
 
             print(f"epoch {epoch_num}, total cost {np.sum(costs)}, args: {repr(args)}")
 

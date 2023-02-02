@@ -2,9 +2,9 @@
 %
 %   OUTPUT = mecanum_mpc(PARAMS) solves a multistage problem
 %   subject to the parameters supplied in the following struct:
-%       PARAMS.x0 - matrix of size [250x1]
+%       PARAMS.x0 - matrix of size [100x1]
 %       PARAMS.xinit - matrix of size [6x1]
-%       PARAMS.all_parameters - matrix of size [525x1]
+%       PARAMS.all_parameters - matrix of size [210x1]
 %
 %   OUTPUT returns the values of the last iteration of the solver where
 %       OUTPUT.x01 - column vector of length 10
@@ -17,21 +17,6 @@
 %       OUTPUT.x08 - column vector of length 10
 %       OUTPUT.x09 - column vector of length 10
 %       OUTPUT.x10 - column vector of length 10
-%       OUTPUT.x11 - column vector of length 10
-%       OUTPUT.x12 - column vector of length 10
-%       OUTPUT.x13 - column vector of length 10
-%       OUTPUT.x14 - column vector of length 10
-%       OUTPUT.x15 - column vector of length 10
-%       OUTPUT.x16 - column vector of length 10
-%       OUTPUT.x17 - column vector of length 10
-%       OUTPUT.x18 - column vector of length 10
-%       OUTPUT.x19 - column vector of length 10
-%       OUTPUT.x20 - column vector of length 10
-%       OUTPUT.x21 - column vector of length 10
-%       OUTPUT.x22 - column vector of length 10
-%       OUTPUT.x23 - column vector of length 10
-%       OUTPUT.x24 - column vector of length 10
-%       OUTPUT.x25 - column vector of length 10
 %
 %   [OUTPUT, EXITFLAG] = mecanum_mpc(PARAMS) returns additionally
 %   the integer EXITFLAG indicating the state of the solution with 
