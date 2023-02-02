@@ -33,7 +33,7 @@ jurisdiction in case of any dispute.
 
 typedef mecanum_mpc_float solver_float;
 typedef solver_int32_default solver_int;
-#define NSTAGES ( 10 )
+#define NSTAGES ( 5 )
 #define MAX(X, Y)  ((X) < (Y) ? (Y) : (X))
 
 /* For compatibility with Microsoft Visual Studio 2015 */
@@ -87,14 +87,14 @@ mecanum_mpc_extfunc pt2function_mecanum_mpc = &;
 static void getDims(const solver_int stage, solver_int* nvar, solver_int* neq, solver_int* dimh, 
              solver_int* dimp, solver_int* diml, solver_int* dimu, solver_int* dimhl, solver_int* dimhu)
 {
-    const solver_int nvarArr[NSTAGES] = {10, 10, 10, 10, 10, 10, 10, 10, 10, 10}; 
-    const solver_int neqArr[NSTAGES] = {6, 6, 6, 6, 6, 6, 6, 6, 6, 0};
-    const solver_int dimhArr[NSTAGES] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-    const solver_int dimpArr[NSTAGES] = {21, 21, 21, 21, 21, 21, 21, 21, 21, 21};
-    const solver_int dimlArr[NSTAGES] = {4, 4, 4, 4, 4, 4, 4, 4, 4, 4};
-    const solver_int dimuArr[NSTAGES] = {4, 4, 4, 4, 4, 4, 4, 4, 4, 4};
-    const solver_int dimhlArr[NSTAGES] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-    const solver_int dimhuArr[NSTAGES] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    const solver_int nvarArr[NSTAGES] = {10, 10, 10, 10, 10}; 
+    const solver_int neqArr[NSTAGES] = {6, 6, 6, 6, 0};
+    const solver_int dimhArr[NSTAGES] = {0, 0, 0, 0, 0};
+    const solver_int dimpArr[NSTAGES] = {21, 21, 21, 21, 21};
+    const solver_int dimlArr[NSTAGES] = {4, 4, 4, 4, 4};
+    const solver_int dimuArr[NSTAGES] = {4, 4, 4, 4, 4};
+    const solver_int dimhlArr[NSTAGES] = {0, 0, 0, 0, 0};
+    const solver_int dimhuArr[NSTAGES] = {0, 0, 0, 0, 0};
 
     *nvar = nvarArr[stage];
     *neq = neqArr[stage];

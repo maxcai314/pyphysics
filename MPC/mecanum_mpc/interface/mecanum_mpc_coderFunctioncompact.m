@@ -21,23 +21,18 @@
 % 
 % [OUTPUTS] = mecanum_mpc(INPUTS) solves an optimization problem where:
 % Inputs:
-% - x0 - matrix of size [100x1]
+% - x0 - matrix of size [50x1]
 % - xinit - matrix of size [6x1]
-% - all_parameters - matrix of size [210x1]
+% - all_parameters - matrix of size [105x1]
 % Outputs:
-% - outputs - column vector of length 100
+% - outputs - column vector of length 50
 function [outputs] = mecanum_mpc(x0, xinit, all_parameters)
     
     [output, ~, ~] = mecanum_mpcBuildable.forcesCall(x0, xinit, all_parameters);
-    outputs = coder.nullcopy(zeros(100,1));
-    outputs(1:10) = output.x01;
-    outputs(11:20) = output.x02;
-    outputs(21:30) = output.x03;
-    outputs(31:40) = output.x04;
-    outputs(41:50) = output.x05;
-    outputs(51:60) = output.x06;
-    outputs(61:70) = output.x07;
-    outputs(71:80) = output.x08;
-    outputs(81:90) = output.x09;
-    outputs(91:100) = output.x10;
+    outputs = coder.nullcopy(zeros(50,1));
+    outputs(1:10) = output.x1;
+    outputs(11:20) = output.x2;
+    outputs(21:30) = output.x3;
+    outputs(31:40) = output.x4;
+    outputs(41:50) = output.x5;
 end

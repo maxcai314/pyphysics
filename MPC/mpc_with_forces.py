@@ -18,7 +18,7 @@ from forcespro import CodeOptions
 from mpc_drive_simulator import DriveModel, get_configurable_parameters
 
 time_lookahead = 1
-frequency = 10
+frequency = 5
 N = int(time_lookahead * frequency)
 
 nin = 4
@@ -47,14 +47,11 @@ if __name__ == '__main__':
     codeoptions.solvemethod = 'PDIP_NLP'
     codeoptions.avx = -1
     codeoptions.sse = -1
-    codeoptions.nlp.compact_code = 1
 #    codeoptions.server = 'https://forces-test.embotech.com'
     codeoptions.cleanup = 0
-
 
     codeoptions.printlevel = 0
     codeoptions.optlevel = 2
 
     codeoptions.overwrite = 1
     m = model.generate_solver(codeoptions)
-# ((uint64_t)*(int16_t*)(*(int64_t*)(&_returned_set_of_fingerprints.6495 + (((int64_t)var_10) << 3)) + (rdx_3 + rdx_3)))
