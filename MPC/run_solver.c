@@ -54,7 +54,7 @@ int main() {
               &((mecanum_mpc_float *) params)[i * NUMVARS + 9]);
         if (result != 10) {
             printf("Error reading initial conditions for stage %d\n", i);
-            goto end;
+            return 1;
         }
     }
     int result = scanf(" XINIT %lf %lf %lf %lf %lf %lf", &params->xinit[0], &params->xinit[1], &params->xinit[2], &params->xinit[3],
@@ -62,7 +62,7 @@ int main() {
 
     if (result != 6) {
         printf("Error reading xinit\n");
-        goto end;
+        return 1;
     }
     for (int i = 0; i < NUMSTAGES; i++) {
         printf("Reading stage %d\n", i);
@@ -90,7 +90,7 @@ int main() {
                            &params->all_parameters[i * NUMPARAMS + 20]);
         if (result != 21) {
             printf("Error reading stage %d", i);
-            goto end;
+            return 1;
         }
     }
 
@@ -99,9 +99,4 @@ int main() {
     printf("BEGIN\n");
     print_mecanum_mpc_info(info);
     print_mecanum_mpc_output(output);
-
-    end:
-    free(params);
-    free(output);
-    free(info);
 }
