@@ -81,7 +81,7 @@ extern solver_int32_default mecanum_mpc_adtool2forces(mecanum_mpc_float *x,     
     in[2] = l;
     in[3] = y;
 
-	if ((0 <= stage && stage <= 3))
+	if ((0 <= stage && stage <= 8))
 	{
 		
 		
@@ -117,7 +117,7 @@ extern solver_int32_default mecanum_mpc_adtool2forces(mecanum_mpc_float *x,     
 			mecanum_mpc_sparse2fullcopy(nrow, ncol, colind, row, nabla_c_sparse, nabla_c);
 		}
 	}
-	if ((4 == stage))
+	if ((9 == stage))
 	{
 		
 		

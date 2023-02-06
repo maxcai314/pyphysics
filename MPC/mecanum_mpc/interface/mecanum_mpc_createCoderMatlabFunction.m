@@ -67,16 +67,16 @@ function mecanum_mpc_createCoderMatlabFunction(modelname, blockname, useCompactB
     end
     
     function_name = 'mecanum_mpc_coderFunction.m';
-    position = [170, 99, 650, 265];
-    parameter_sizes = struct('x0', '[50,1]',...
+    position = [170, 99, 650, 350];
+    parameter_sizes = struct('x0', '[100,1]',...
                              'xinit', '[6,1]',...
-                             'all_parameters', '[105,1]');
+                             'all_parameters', '[210,1]');
     if useCompactBlock
         function_name = 'mecanum_mpc_coderFunctioncompact.m';
         position = [170, 99, 650, 231];
-        parameter_sizes = struct('x0', '[50,1]',...
+        parameter_sizes = struct('x0', '[100,1]',...
                                  'xinit', '[6,1]',...
-                                 'all_parameters', '[105,1]');
+                                 'all_parameters', '[210,1]');
     end
     
     result = exist(modelname, 'file');

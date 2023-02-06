@@ -8,7 +8,7 @@
 
 #include "musl_compat.h"
 
-#define NUMSTAGES 5
+#define NUMSTAGES 10
 #define NUMVARS 10
 #define NUMPARAMS 21
 

@@ -17,7 +17,7 @@ from forcespro import CodeOptions
 
 from mpc_drive_simulator import DriveModel, get_configurable_parameters
 
-time_lookahead = 1
+time_lookahead = 2
 frequency = 5
 N = int(time_lookahead * frequency)
 
@@ -34,7 +34,7 @@ if __name__ == '__main__':
     model.objective = robot.eval_obj
     model.eq = lambda z, p: forcespro.nlp.integrate(robot.continuous_dynamics, z[nin:], z[:nin], p,
                                                     integrator=forcespro.nlp.integrators.RK4,
-                                                    stepsize=time_lookahead / frequency)
+                                                    stepsize=.2)
 
     model.E = np.hstack((np.zeros((nstate, nin)), np.eye(nstate)))
 
@@ -51,7 +51,7 @@ if __name__ == '__main__':
     codeoptions.cleanup = 0
 
     codeoptions.printlevel = 2
-    codeoptions.optlevel = 2
+    codeoptions.optlevel = 0
 
     codeoptions.overwrite = 1
     m = model.generate_solver(codeoptions)
