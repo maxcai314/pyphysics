@@ -17,8 +17,8 @@ from forcespro import CodeOptions
 
 from mpc_drive_simulator import DriveModel, get_configurable_parameters
 
-time_lookahead = 2
-frequency = 5
+time_lookahead = 1
+frequency = 10
 N = int(time_lookahead * frequency)
 
 nin = 4
