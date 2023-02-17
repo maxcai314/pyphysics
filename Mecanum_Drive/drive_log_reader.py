@@ -104,8 +104,8 @@ class DriveLogReader():
     
     def plot_trajectory(self):
         fig2 = plt.figure()
-        self.robot.plot_trajectory(self.pos_sim, linecolor='b', fig=fig2, show=False)
-        self.robot.plot_trajectory(self.pos_real, linecolor='c', fig=fig2, show=True)
+        self.robot.plot_trajectory(self.pos_real, linecolor='c', fig=fig2, show=False)
+        self.robot.plot_trajectory(self.pos_sim, linecolor='b', fig=fig2, show=True)
     
     def plot_acceleration(self, showX = True, showY = True, showAngle = True):
         plt.figure()
