@@ -6,23 +6,32 @@
 #include "mecanum_mpc.h"
 #include "mecanum_mpc_memory.h"
 
+#include "musl_compat.h"
+
 #define NUMSTAGES 10
 #define NUMVARS 10
+#define NUMPARAMS 21
 
 extern mecanum_mpc_extfunc mecanum_mpc_adtool2forces;
 
-struct __attribute__((__packed__)) objective_term {
-    mecanum_mpc_float desired;
-    mecanum_mpc_float weight;
-};
+void print_mecanum_mpc_info(mecanum_mpc_info *info) {
+    // print all solver info besides the solver ID in a format easily parsable on a single line
+    printf("INFO %d %d %e %e %e %e %e %e %e %e %e %e %e %d %d %e %e %e %e\n",
+           info->it, info->it2opt, info->res_eq, info->res_ineq, info->rsnorm, info->rcompnorm, info->pobj, info->dobj,
+           info->dgap, info->rdgap, info->mu, info->mu_aff, info->sigma, info->lsit_aff, info->lsit_cc, info->step_aff,
+           info->step_cc, info->solvetime, info->fevalstime);
+}
 
-struct __attribute__((__packed__)) mecanum_solver_params {
-    mecanum_mpc_float battery_voltage;
-
-    struct objective_term fl, fr, bl, br;
-    struct objective_term x, y, theta;
-    struct objective_term x_vel, y_vel, theta_vel;
-};
+void print_mecanum_mpc_output(mecanum_mpc_output *output) {
+    mecanum_mpc_float *output_vars = (mecanum_mpc_float *) output;
+    for (int i = 0; i < NUMSTAGES; i++) {
+        printf("STAGE ");
+        for (int j = 0; j < NUMVARS; j++) {
+            printf("%e ", output_vars[i * NUMVARS + j]);
+        }
+        printf("\n");
+    }
+}
 
 int main() {
     mecanum_mpc_params *params = malloc(sizeof(mecanum_mpc_params));
@@ -31,30 +40,63 @@ int main() {
     mecanum_mpc_mem *args = mecanum_mpc_internal_mem(0);
     FILE *debug_output = stdout;
 
-    memset(params, 0, sizeof(*params));
     for (int i = 0; i < NUMSTAGES; i++) {
-        struct mecanum_solver_params *stage_params = &((struct mecanum_solver_params *) (params->all_parameters))[i];
+        int result = scanf(" INITIAL %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf",
+              &((mecanum_mpc_float *) params)[i * NUMVARS + 0],
+              &((mecanum_mpc_float *) params)[i * NUMVARS + 1],
+              &((mecanum_mpc_float *) params)[i * NUMVARS + 2],
+              &((mecanum_mpc_float *) params)[i * NUMVARS + 3],
+              &((mecanum_mpc_float *) params)[i * NUMVARS + 4],
+              &((mecanum_mpc_float *) params)[i * NUMVARS + 5],
+              &((mecanum_mpc_float *) params)[i * NUMVARS + 6],
+              &((mecanum_mpc_float *) params)[i * NUMVARS + 7],
+              &((mecanum_mpc_float *) params)[i * NUMVARS + 8],
+              &((mecanum_mpc_float *) params)[i * NUMVARS + 9]);
+        if (result != 10) {
+            printf("Error reading initial conditions for stage %d\n", i);
+            return 1;
+        }
+    }
+    int result = scanf(" XINIT %lf %lf %lf %lf %lf %lf", &params->xinit[0], &params->xinit[1], &params->xinit[2], &params->xinit[3],
+          &params->xinit[4], &params->xinit[5]);
 
-        stage_params->battery_voltage = 12.0;
-        stage_params->x.desired = 1;
-        stage_params->y.desired = 0;
-
-        stage_params->x.weight = 1;
-        stage_params->y.weight = 1;
+    if (result != 6) {
+        printf("Error reading xinit\n");
+        return 1;
+    }
+    for (int i = 0; i < NUMSTAGES; i++) {
+        printf("Reading stage %d\n", i);
+        int result = scanf(" STAGE %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf",
+                           &( params->all_parameters)[i * NUMPARAMS + 0],
+                           &params->all_parameters[i * NUMPARAMS + 1],
+                           &params->all_parameters[i * NUMPARAMS + 2],
+                           &params->all_parameters[i * NUMPARAMS + 3],
+                           &params->all_parameters[i * NUMPARAMS + 4],
+                           &params->all_parameters[i * NUMPARAMS + 5],
+                           &params->all_parameters[i * NUMPARAMS + 6],
+                           &params->all_parameters[i * NUMPARAMS + 7],
+                           &params->all_parameters[i * NUMPARAMS + 8],
+                           &params->all_parameters[i * NUMPARAMS + 9],
+                           &params->all_parameters[i * NUMPARAMS + 10],
+                           &params->all_parameters[i * NUMPARAMS + 11],
+                           &params->all_parameters[i * NUMPARAMS + 12],
+                           &params->all_parameters[i * NUMPARAMS + 13],
+                           &params->all_parameters[i * NUMPARAMS + 14],
+                           &params->all_parameters[i * NUMPARAMS + 15],
+                           &params->all_parameters[i * NUMPARAMS + 16],
+                           &params->all_parameters[i * NUMPARAMS + 17],
+                           &params->all_parameters[i * NUMPARAMS + 18],
+                           &params->all_parameters[i * NUMPARAMS + 19],
+                           &params->all_parameters[i * NUMPARAMS + 20]);
+        if (result != 21) {
+            printf("Error reading stage %d", i);
+            return 1;
+        }
     }
 
     mecanum_mpc_solve((mecanum_mpc_params *) params, output, info, args, debug_output, &mecanum_mpc_adtool2forces);
-    // print output
-    for (int i = 0; i < NUMSTAGES; i++) {
-        printf("Stage %d: ", i);
-        for (int j = 0; j < NUMSTAGES; j++) {
-            printf("%f ", *(((mecanum_mpc_float *) output) + i * NUMVARS + j));
-        }
-        printf("\n");
-    }
-    printf("pobj: %f, solvetime: %f ms\n", info->pobj, info->solvetime * 1000);
 
-    free(params);
-    free(output);
-    free(info);
+    printf("BEGIN\n");
+    print_mecanum_mpc_info(info);
+    print_mecanum_mpc_output(output);
 }

@@ -154,8 +154,7 @@ def simulate(sample, args, graph_velocity=False, graph_position=False):
     startPos = np.array([sample.x_position[0], sample.y_position[0], sample.angle[0]])
     startVel = np.array([sample.x_velocity[0], sample.y_velocity[0], sample.angular_velocity[0]])
 
-    robot = Drivetrain(motor_constant=motor_constant, I_z=I_z, I_w=I_w, friction=friction,
-                       directional_friction=directional_friction, startPos=startPos.reshape((-1, 1)),
+    robot = Drivetrain(motor_constant=motor_constant, I_z=I_z, I_w=I_w, friction=friction, startPos=startPos.reshape((-1, 1)),
                        startVel=startVel.reshape((-1, 1)))
 
     robot_position = np.zeros((len(sample), 3))
@@ -253,15 +252,16 @@ def grad_simple(args):
 
 if __name__ == '__main__':
     DO_MULTITHREADING = True  # this might kill your computer
-    samples = [DataSeries.from_csv(f) for f in glob.glob('drive_samples/*.csv')]
-    args = np.array([1.55687398, 0.0549806 , 0.36827043, 0.05758405, 0.00923156,
+    samples = [DataSeries.from_csv(f) for f in glob.glob('drive_samples/r2.csv')]
+    args = np.array([1.55687398, 0.0549806 , 0.337033995, 0.05758405, 0.00923156,
                      0.06716439, 0.02307628])
-    print(simulate(DataSeries.from_csv("drive_samples/driving_around_log_slower_8.csv"), args, graph_velocity=True, graph_position=False))
+    print(simulate(DataSeries.from_csv("drive_samples/r2.csv"), args, graph_velocity=True, graph_position=False))
 
     with Pool(len(args) * 2 if DO_MULTITHREADING else 1) as p:
         for epoch_num in range(100000):
             costs, g = grad(samples, args, p)
-            args -= g * .01
+            g[2] = 0
+            args -= g * .001
 
             print(f"epoch {epoch_num}, total cost {np.sum(costs)}, args: {repr(args)}")
 

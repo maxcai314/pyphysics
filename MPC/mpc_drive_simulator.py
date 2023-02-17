@@ -9,7 +9,7 @@ from casadi import *
 # import numpy as np
 import aerosandbox.numpy as np
 
-from Mecanum_Drive.mecanum_data import DataSeries
+from mecanum_data import DataSeries
 
 
 def rotationmatrix(psi):
