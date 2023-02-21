@@ -17,7 +17,7 @@ class Robot():
                  I_w=[0.05,0.05,0.05,0.05],
                  S_geometric=None,d_geometric=None,alpha=None,
                  x_center=0., y_center=0.,
-                 friction=0.1, q_r=None, q_rdot=None, d1=0.1,d2=-0.1,S3=-0.1,r_odo=0.05):
+                 friction=0.1, static_friction=0, q_r=None, q_rdot=None, d1=0.1,d2=-0.1,S3=-0.1,r_odo=0.05):
         self.L=L
         self.l=l
         self.r=r
@@ -27,7 +27,8 @@ class Robot():
         self.S_geometric = S_geometric
         self.d_geometric = d_geometric
         self.alpha = alpha
-        self.friction=friction
+        self.friction = friction
+        self.static_friction = static_friction
         self.q_r = q_r
         self.q_rdot = q_rdot
         self.d1 = d1
@@ -80,6 +81,24 @@ class Robot():
     def K_div_psidot_analytic(self):
         return np.matrix([[0,self.I_w[0] * 4 * self.r**-2 ,0],[-self.I_w[0] * 4 * self.r**-2,0,0],[0,0,0]])
     
+    def get_friction(self, q_wdot, Gamma): # written weirdly to be compatible with scalar and vector friction constants
+        static_wheels = np.zeros_like(q_wdot)
+        dynamic_wheels = np.zeros_like(q_wdot)
+        for i in range(len(q_wdot)):
+            if q_wdot[i] == 0:
+                static_wheels[i] = np.sign(Gamma[i])
+            else:
+                dynamic_wheels[i] = np.sign(q_wdot[i])
+
+        static_friction = self.static_friction * static_wheels
+        for i in range(len(q_wdot)):
+            if np.sign((Gamma-static_friction)[i] * Gamma[i]) == -1:
+                static_friction[i] = Gamma[i]
+
+        dynamic_friction = self.friction * dynamic_wheels
+
+        return Gamma - static_friction - dynamic_friction
+
     def get_aceleration(self, Gamma, angle, q_rdot):
         Rotation = self.rotationmatrix(angle)
         Rotationdot = self.rotationmatrixdot(angle,q_rdot[2,0])
@@ -88,7 +107,7 @@ class Robot():
         
         self.H = self.M_r + Rotation @ self.R.T @ self.M_w @ self.R @ np.linalg.inv(Rotation)
         self.K = Rotation @ self.R.T @ self.M_w @ self.R @ Rotationdot.T
-        self.F_a = Rotation @ (self.R.T @ (Gamma - np.sign(q_wdot) * self.friction))
+        self.F_a = Rotation @ (self.R.T @ self.get_friction(q_wdot, Gamma))
         q_rddot = np.linalg.inv(self.H) @ (self.F_a - self.K @ q_rdot)
         return q_rddot
     
