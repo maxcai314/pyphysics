@@ -22,17 +22,17 @@ def rotationmatrixdot(psi, psidot):
 
 
 class DriveModel():
-    def __init__(self, motor_constant=0.36827043, I_z=1.55687398, I_w=np.ones(4) * 0.0549806, L=0.115, l=0.1325, m=11.2,
-                 r=0.048, dynamic_friction=np.array([[0.05758405], [0.00923156], [0.06716439], [0.02307628]]), static_friction=np.array([[1.], [1.], [1.], [1.]])):
+    def __init__(self, motor_constant=0.36827043, robot_moment=1.55687398, wheel_moment=np.ones(4) * 0.0549806, robot_forwards_axis=0.115, robot_sideways_axis=0.1325, mass=11.2,
+                 wheel_radius=0.048, dynamic_friction=np.array([[0.05758405], [0.00923156], [0.06716439], [0.02307628]]), static_friction=np.array([[1.], [1.], [1.], [1.]])):
         self.armature_resistance = 1.6
         self.motor_constant = motor_constant
 
-        self.L = L
-        self.l = l
-        self.r = r
-        self.m = m
-        self.I_z = I_z
-        self.I_w = I_w
+        self.L = robot_forwards_axis
+        self.l = robot_sideways_axis
+        self.r = wheel_radius
+        self.m = mass
+        self.I_z = robot_moment
+        self.I_w = wheel_moment
         self.dynamic_friction = dynamic_friction
         self.static_friction = static_friction
 
@@ -63,13 +63,13 @@ class DriveModel():
         rotation = rotationmatrix(angle)
         rotationdot = rotationmatrixdot(angle, angleVel)
 
-        wheel_velocity = self.R @ np.linalg.inv(rotation) @ velocity
+        wheel_velocity = self.R @ rotation.T @ velocity
 
         H = self.M_r + rotation @ self.R.T @ self.M_w @ self.R @ np.linalg.inv(rotation)
         K = rotation @ self.R.T @ self.M_w @ self.R @ rotationdot.T
         F_a = rotation @ (self.R.T @ (self.get_external_torque(wheel_velocity, torques)))
-        q_rddot = np.linalg.inv(H) @ (F_a - K @ velocity)
-        return q_rddot
+        acceleration = np.linalg.inv(H) @ (F_a - K @ velocity)
+        return acceleration
 
     def torque(self, position, velocity, voltage, inputs):
         angle = position[2]
