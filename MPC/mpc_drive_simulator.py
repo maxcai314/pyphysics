@@ -11,6 +11,7 @@ import aerosandbox.numpy as np
 
 from mecanum_data import DataSeries
 
+static_friction_threshold = 0.1
 
 def rotationmatrix(psi):
     return np.array([[np.cos(psi), -np.sin(psi), 0], [np.sin(psi), np.cos(psi), 0], [0, 0, 1]])
@@ -50,7 +51,7 @@ class DriveModel():
     def get_external_torque(self, wheel_velocity, torques):
         torque = np.zeros(4)
         for i in range(4):
-            if wheel_velocity[i] == 0:  # static friction
+            if np.abs(wheel_velocity[i]) < static_friction_threshold:  # static friction
                 torque[i] = np.clip((torques[i] - self.static_friction[i]), min(0, torques[i]), max(0, torques[i]))
             else:  # dynamic friction
                 torque[i] = torques[i] - (np.sign(wheel_velocity[i]) * self.dynamic_friction[i])
