@@ -22,7 +22,7 @@ def rotationmatrixdot(psi, psidot):
 
 class DriveModel():
     def __init__(self, motor_constant=0.36827043, I_z=1.55687398, I_w=np.ones(4) * 0.0549806, L=0.115, l=0.1325, m=11.2,
-                 r=0.048, friction=np.array([[0.05758405], [0.00923156], [0.06716439], [0.02307628]])):
+                 r=0.048, dynamic_friction=np.array([[0.05758405], [0.00923156], [0.06716439], [0.02307628]]), static_friction=np.array([[1.], [1.], [1.], [1.]])):
         self.armature_resistance = 1.6
         self.motor_constant = motor_constant
 
@@ -32,7 +32,8 @@ class DriveModel():
         self.m = m
         self.I_z = I_z
         self.I_w = I_w
-        self.friction = friction
+        self.dynamic_friction = dynamic_friction
+        self.static_friction = static_friction
 
         self.M_r = np.diag([self.m, self.m, self.I_z])
         self.M_w = np.diag(self.I_w)
@@ -46,17 +47,26 @@ class DriveModel():
             self.R[i] = 1 / self.r * np.array(
                 [1, -np.tan(self.alpha[i]) ** -1, -self.d[i] - self.S[i] * (np.tan(self.alpha[i]) ** -1)])
 
+    def get_external_torque(self, wheel_velocity, torques):
+        torque = np.zeros(4)
+        for i in range(4):
+            if wheel_velocity[i] == 0:  # static friction
+                torque[i] = np.clip((torques[i] - self.static_friction[i]), min(0, torques[i]), max(0, torques[i]))
+            else:  # dynamic friction
+                torque[i] = torques[i] - (np.sign(wheel_velocity[i]) * self.dynamic_friction[i])
+        return torque
+
     def get_aceleration(self, position, velocity, torques):
         angle = position[2]
         angleVel = velocity[2]
         rotation = rotationmatrix(angle)
         rotationdot = rotationmatrixdot(angle, angleVel)
 
-        q_wdot = self.R @ np.linalg.inv(rotation) @ velocity
+        wheel_velocity = self.R @ np.linalg.inv(rotation) @ velocity
 
         H = self.M_r + rotation @ self.R.T @ self.M_w @ self.R @ np.linalg.inv(rotation)
         K = rotation @ self.R.T @ self.M_w @ self.R @ rotationdot.T
-        F_a = rotation @ (self.R.T @ (torques - np.sign(q_wdot) * self.friction))
+        F_a = rotation @ (self.R.T @ (self.get_external_torque(wheel_velocity, torques)))
         q_rddot = np.linalg.inv(H) @ (F_a - K @ velocity)
         return q_rddot
 
